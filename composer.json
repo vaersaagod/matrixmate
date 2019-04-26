@@ -1,0 +1,40 @@
+{
+    "name": "vaersaagod/matrixmate",
+    "description": "Welding Matrix into shape, mate!",
+    "type": "craft-plugin",
+    "version": "1.1.2",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "matrixmate"
+    ],
+    "support": {
+        "docs": "https://github.com/vaersaagod/matrixmate/blob/master/README.md",
+        "issues": "https://github.com/vaersaagod/matrixmate/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Værsågod",
+            "homepage": "https://vaersaagod.no"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+          "vaersaagod\\matrixmate\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "MatrixMate",
+        "handle": "matrixmate",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/vaersaagod/matrixmate/master/CHANGELOG.md",
+        "class": "vaersaagod\\matrixmate\\MatrixMate"
+    }
+}

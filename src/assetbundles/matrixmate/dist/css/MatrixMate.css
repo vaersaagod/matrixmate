@@ -1,0 +1,136 @@
+/**
+ * MatrixMate plugin for Craft CMS
+ *
+ * MatrixMate CSS
+ *
+ * @author    Værsågod
+ * @copyright Copyright (c) 2019 Værsågod
+ * @link      https://vaersaagod.no
+ * @package   MatrixMate
+ * @since     1.0.0
+ */
+
+.matrixmate-buttons:first-child {
+    margin-top: 0 !important;
+}
+
+.matrixmate-buttons:last-child {
+    margin-bottom: 0 !important;
+}
+
+.matrixmate-buttons {
+    position: relative;
+    margin: 24px 0;
+    min-height: 30px;
+}
+
+.matrixmate-buttons:before {
+    content: '.';
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    margin-bottom: -5px;
+}
+
+body.ltr .matrixmate-buttons > .btn, body.ltr .matrixmate-buttons > .btngroup {
+    float: left;
+}
+
+body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
+    float: right;
+}
+
+body.ltr .matrixmate-buttons > .btn, body.ltr .matrixmate-buttons > .btngroup {
+    margin: 0px 5px 0 0;
+}
+
+body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
+    margin: 0px 0 0 5px;
+}
+
+.matrixmate-buttons > .btn:first, .matrixmate-buttons > .btngroup:first {
+    margin-top: 5px !important;
+}
+
+.border-box + .matrixmate-buttons, .shadow-box + .matrixmate-buttons {
+    margin-top: 7px;
+}
+
+.matrix-field:not(.matrixmate-inited) > .buttons,
+.matrix-field:not(.matrixmate-inited) > .blocks > .matrixblock > .fields {
+    visibility: hidden !important;
+}
+
+.matrixmate-block-inited.collapsed.draghelper .matrixmate-tabs,
+.matrixmate-block-inited.collapsed.draghelper .matrixmate-fields,
+.matrixmate-block-inited.velocity-animating .matrixmate-tabs,
+.matrixmate-block-inited.velocity-animating .matrixmate-fields,
+.matrixmate-block-inited.collapsed .matrixmate-tabs,
+.matrixmate-block-inited.collapsed .matrixmate-fields {
+    -webkit-opacity: 0 !important;
+    -moz-opacity: 0 !important;
+    opacity: 0 !important;
+}
+
+.matrixmate-block-inited .matrixmate-tabs {
+    position: absolute;
+    top: 0;
+    right: 76px;
+    display: block;
+    font-size: 0;
+}
+
+.matrixmate-block-inited .matrixmate-tabs li {
+    display: inline-block;
+    font-size: 13px;
+}
+
+.matrixmate-block-inited .matrixmate-tabs li a {
+    display: block;
+    padding: 5px 10px;
+    color: #777;
+    white-space: nowrap;
+}
+
+.matrixmate-block-inited .matrixmate-tabs li a:hover {
+    text-decoration: none;
+    color: #0d78f2;
+}
+
+.matrixmate-block-inited .matrixmate-tabs li a.sel {
+    color: #29323d;
+    background-color: #fbfcfd;
+    border-left: 1px solid #e3e5e8;
+    border-right: 1px solid #e3e5e8;
+    border-bottom: 1px solid #fbfcfd;
+}
+
+.matrixmate-block-inited.disabled .matrixmate-tabs {
+    right: 106px;
+}
+
+.matrixmate-settings-menu h6 {
+    margin-top: 10px;
+    margin-bottom: 0;
+    padding-left: 10px;
+}
+
+body.ltr .matrixmate-settings-menu a.fieldtoggle:before {
+    left: -12px;
+}
+
+body.rtl .matrixmate-settings-menu a.fieldtoggle:before {
+    right: -12px;
+}
+
+.matrixmate-collapsed-menu ul {
+    padding-top: 5px;
+}
+
+html.noscroll .matrixmate-collapsed-menu,
+html.noscroll .matrixmate-settings-menu {
+    max-height: 50%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
