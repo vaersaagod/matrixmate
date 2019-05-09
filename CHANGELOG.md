@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.3 - 2019-05-09
+### Fixed
+- Fixes a layout glitch that could happen when collapsing block types with field tabs within them
+- Fixes a layout glitch where block group dropdown menus could display scrollbars
+
 ## 1.1.2 - 2019-04-26
 ### Fixed
 - Improves field config parsing and general code quality
