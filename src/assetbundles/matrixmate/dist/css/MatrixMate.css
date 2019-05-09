@@ -73,6 +73,10 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
     opacity: 0 !important;
 }
 
+.matrixmate-block-inited.collapsed .matrixmate-tabs {
+    pointer-events: none;
+}
+
 .matrixmate-block-inited .matrixmate-tabs {
     position: absolute;
     top: 0;

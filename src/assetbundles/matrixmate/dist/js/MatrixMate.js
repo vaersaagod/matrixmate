@@ -344,9 +344,9 @@
                 var matrixmateNamespace = 'matrixmate-' + namespace;
 
                 var $tabs = $('<ul class="matrixmate-tabs"/>').appendTo($block);
-                var $matrixmateFields = $('<div class="matrixmate-fields"/>').css({ 'opacity': 0 }).appendTo($block);
                 var $fields = $block.find('> .fields');
-                $fields.css({ 'opacity': 0 });
+                var $matrixmateFields = $('<div class="matrixmate-fields"/>');
+                $fields.append($matrixmateFields);
 
                 // Create tabs
                 var usedFields = [];
@@ -405,7 +405,7 @@
                     Craft.initUiElements($matrixmateFields);
                 }, this));
 
-                $fields.hide();
+                //$fields.hide();
 
             },
 
