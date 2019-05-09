@@ -206,7 +206,7 @@
                     }
 
                     var $mainMenuBtn = $('<div class="btn menubtn">' + label + '</div>').appendTo($matrixmateButtons);
-                    var $mainMenu = $('<div class="menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
+                    var $mainMenu = $('<div class="menu matrixmate-menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
                     var $mainUl = $('<ul />').appendTo($mainMenu);
 
                     if (c > 0) {
@@ -400,12 +400,6 @@
                 }
 
                 this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
-
-                $matrixmateFields.velocity({ opacity: 1 }, 'fast', $.proxy(function () {
-                    Craft.initUiElements($matrixmateFields);
-                }, this));
-
-                //$fields.hide();
 
             },
 

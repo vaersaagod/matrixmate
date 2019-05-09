@@ -24,6 +24,10 @@
     min-height: 30px;
 }
 
+.field:last-child .matrixmate-buttons {
+    margin-bottom: 36px;
+}
+
 .matrixmate-buttons:before {
     content: '.';
     display: block;
@@ -137,4 +141,9 @@ html.noscroll .matrixmate-settings-menu {
     max-height: 50%;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.matrixmate-menu {
+    overflow: hidden;
+    max-height: none !important;
 }
