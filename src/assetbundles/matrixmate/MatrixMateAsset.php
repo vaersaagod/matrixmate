@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2019 Værsågod
  */
 
-namespace vaersaagod\matrixmate\assetbundles\MatrixMate;
+namespace vaersaagod\matrixmate\assetbundles\matrixmate;
 
 use Craft;
 use craft\helpers\Json;
