@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.4 - 2019-05-10
+### Fixed
+- Fixes a namespace typo that could make Composer choke in case-sensitive environments. Thanks a lot @Mosnar!  
+
 ## 1.1.3 - 2019-05-09
 ### Fixed
 - Fixes a layout glitch that could happen when collapsing block types with field tabs within them
