@@ -13,7 +13,7 @@ namespace vaersaagod\matrixmate;
 use craft\services\Fields;
 use craft\services\Sections;
 use craft\web\Application;
-use vaersaagod\matrixmate\assetbundles\MatrixMate\MatrixMateAsset;
+use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
 
