@@ -324,7 +324,18 @@
 
                 var type = $block.data('type');
                 var typeConfig = this._getTypeConfig(type, $field);
-                if (!typeConfig || !typeConfig.tabs) {
+
+                if (!typeConfig) {
+                    return;
+                }
+
+                if (typeConfig.color) {
+                    var $title = $block.find('> .titlebar');
+                    var rgba = this._hex2rgba(typeConfig.color, .2);
+                    $title.css({'background-color':rgba});
+                }
+
+                if (!typeConfig.tabs) {
                     return;
                 }
 
@@ -623,7 +634,6 @@
 
                 $target.siblings('div').addClass('hidden');
                 $target.removeClass('hidden');
-
             },
 
             onMatrixInputInit: function (e) {
@@ -632,6 +642,21 @@
 
             onMatrixInputBlockAdded: function (e) {
                 this.initBlock(e.$block, e.target.$container);
+            },
+
+            _hex2rgba: function ($hex, $a) {
+                var $r, $g, $b;
+                if ($hex.charAt(0) == '#') $hex = $hex.substr(1);
+                if ($hex.length == 3) $hex = $hex.substr(0,1) + $hex.substr(0,1) + $hex.substr(1,2) + $hex.substr(1,2) + $hex.substr(2,3) + $hex.substr(2,3);
+                
+                $r = $hex.charAt(0) + '' + $hex.charAt(1);
+                $r = parseInt($r, 16);
+                $g = $hex.charAt(2) + '' + $hex.charAt(3);
+                $g = parseInt($g, 16);
+                $b = $hex.charAt(4) + '' + $hex.charAt(5);
+                $b = parseInt($b, 16);
+                
+                return 'rgba('+ $r +','+ $g +','+ $b +','+ $a +')';
             }
 
         }, {

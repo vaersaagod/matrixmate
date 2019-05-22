@@ -31,6 +31,7 @@ return [
             ]],
             'types' => [
                 'text' => [
+                    'color' => '#000',
                     'tabs' => [[
                         'label' => 'Content',
                         'fields' => ['heading', 'text'],

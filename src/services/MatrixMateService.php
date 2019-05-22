@@ -205,10 +205,14 @@ class MatrixMateService extends Component
             }
             // Get tabs
             $tabs = $this->getTabsConfigFromArray($typeConfig);
+            // Get color
+            $color = $typeConfig['color'] ?? null;
+
             $typeConfig = [
                 'tabs' => $tabs,
                 'defaultTabName' => $defaultTabName,
                 'maxLimit' => $maxLimit,
+                'color' => $color,
             ];
         }
         return $types;
