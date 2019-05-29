@@ -148,7 +148,7 @@ class MatrixMate extends Plugin
         $view = Craft::$app->getView();
         $view->registerAssetBundle(MatrixMateAsset::class);
 
-        $view->registerJs('new Craft.MatrixMate(' . Json::encode($settings, JSON_UNESCAPED_UNICODE) . ');');
+        $view->registerJs('if (Craft && Craft.MatrixMate) { new Craft.MatrixMate(' . Json::encode($settings, JSON_UNESCAPED_UNICODE) . '); }');
 
     }
 
