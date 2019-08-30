@@ -74,6 +74,7 @@ return [
                         'label' => 'Settings',
                         'fields' => ['columns'],
                     ]],
+                    'hiddenFields' => ['backgroundColor', 'textColor'],
                 ],
                 'news' => [
                     'maxLimit' => 1,
@@ -90,6 +91,8 @@ return [
 To explain what the above example would do:  
 
 For a Matrix field with the handle `matrixFieldHandle`, the above configuration would create two block type groups called "Content" and "Listings". The fields inside the `text` block type would be sorted into two tabs called "Text" and "Settings", and the `news` block type would be limited to a single block, using the `maxLimit` setting.  
+
+Additionally, two fields called `backgroundColor` and `textColor` in the `text` block type are *hidden*, using the `hiddenFields` setting (added in MatrixMate v. 1.2.0).  
 
 For a more detailed overview of the different settings available when configuring MatrixMate, see the [Configuration settings](#configuration-settings) section.  
 
@@ -300,6 +303,23 @@ To set a maximum limit for a particular type, add a key called `'maxLimit'` to t
     ],
 ],
 ```
+
+##### Hide fields
+
+To hide specific fields within a block type's config, use the `hiddenFields` setting (should be an array of field handles):  
+```php 
+...
+'types' => [
+    ...
+    'text' => [
+        'hiddenFields' => ['backgroundColor', 'textColor'],
+    ],
+],
+```
+Note that any field in `hiddenFields` will be hidden, even if that field is also added to a tab.  
+
+_Take care not to hide required fields!_ MatrixMate does not include any functionality to account for required fields that are hidden, so hiding a required field would make it impossible for the content editor to actually save the block.  
+
 
 #### hideUngroupedTypes [bool]
 *Default: `false`*  

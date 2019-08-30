@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.0 - 2019-08-30
+### Added
+- Added the `hiddenFields` config setting for block type configs, which makes it possible to hide specific fields without having to use the `tabs` setting  
+### Changed
+- MatrixMate will now render tabs even if there is only a single tab defined in config (but it will only display tab buttons in block headers if there is more than one tab rendered). Fixes #9
+
 ## 1.1.5 - 2019-05-29
 ### Fixed
 - Fixes issues related to Matrix fields nested in SuperTable fields  
