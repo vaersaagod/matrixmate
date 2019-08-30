@@ -328,17 +328,18 @@
                     return;
                 }
 
-                var tabs = typeConfig.tabs;
-                if (typeConfig['defaultTabName'] || null) {
-                    tabs.push({
-                        label: typeConfig.defaultTabName,
-                        isDefaultTab: true
-                    });
-                }
-
-                if (tabs.length < 2) {
+                var tabs = (typeConfig.tabs || []);
+                if (!tabs.length) {
                     return;
                 }
+
+                var renderDefaultTab = !!(typeConfig['defaultTabName'] || null);
+
+                tabs.push({
+                    label: typeConfig['defaultTabName'] || 'Default',
+                    isDefaultTab: true,
+                    render: renderDefaultTab
+                });
 
                 var namespace = $field.prop('id') + '-' + $block.data('id');
                 var matrixmateNamespace = 'matrixmate-' + namespace;
@@ -350,7 +351,6 @@
 
                 // Create tabs
                 var usedFields = [];
-
                 var tabIndex = 0;
                 for (var i = 0; i < tabs.length; i++) {
 
@@ -385,10 +385,12 @@
 
                     $pane.appendTo($matrixmateFields);
 
-                    var $tabLi = $('<li/>').appendTo($tabs);
-                    var $tabA = $('<a id="' + matrixmateNamespace + '-' + i + '" class="tab' + navClasses + '">' + tabs[i].label + '</a>')
-                        .appendTo($tabLi)
-                        .data('matrixmate-tabtarget', '#' + matrixmateNamespace + '-pane-' + i);
+                    if (tabs[i]['render'] !== false) {
+                        var $tabLi = $('<li/>').appendTo($tabs);
+                        var $tabA = $('<a id="' + matrixmateNamespace + '-' + i + '" class="tab' + navClasses + '">' + tabs[i].label + '</a>')
+                            .appendTo($tabLi)
+                            .data('matrixmate-tabtarget', '#' + matrixmateNamespace + '-pane-' + i);
+                    }
 
                     if ($pane.find('.field.has-errors').length > 0) {
                         $tabA.addClass('error');
@@ -397,6 +399,10 @@
 
                     tabIndex++;
 
+                }
+
+                if ($tabs.children().length <= 1) {
+                    $tabs.hide();
                 }
 
                 this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
