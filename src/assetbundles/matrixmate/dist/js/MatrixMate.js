@@ -324,19 +324,31 @@
 
                 var type = $block.data('type');
                 var typeConfig = this._getTypeConfig(type, $field);
-                if (!typeConfig || !typeConfig.tabs) {
+
+                if (!typeConfig) {
                     return;
                 }
 
                 var tabs = (typeConfig.tabs || []);
+                var numTabs = tabs.length;
+
+                // If we have any hidden fields, we'll stick them in a hidden tab
+                var hiddenFields = typeConfig['hiddenFields'] || [];
+                if (hiddenFields.length) {
+                    tabs.unshift({
+                        fields: hiddenFields,
+                        render: false
+                    });
+                }
+
                 if (!tabs.length) {
                     return;
                 }
 
-                var renderDefaultTab = !!(typeConfig['defaultTabName'] || null);
+                var renderDefaultTab = !!(typeConfig['defaultTabName'] || null) || (!numTabs && hiddenFields.length);
 
                 tabs.push({
-                    label: typeConfig['defaultTabName'] || 'Default',
+                    label: typeConfig['defaultTabName'] || Craft.t('Fields'),
                     isDefaultTab: true,
                     render: renderDefaultTab
                 });
@@ -352,18 +364,13 @@
                 // Create tabs
                 var usedFields = [];
                 var tabIndex = 0;
+                var hasRenderedSelectedTab = false;
                 for (var i = 0; i < tabs.length; i++) {
 
                     var navClasses = '';
                     var paneClasses = '';
 
-                    if (tabIndex === 0) {
-                        navClasses = ' sel';
-                    } else {
-                        paneClasses = ' hidden';
-                    }
-
-                    var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" class="' + paneClasses + '"/>');
+                    var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" />');
 
                     var tabFieldHandles = tabs[i]['fields'] || [];
                     $fields.find('> .field').each($.proxy(function (index, field) {
@@ -383,7 +390,14 @@
                         continue;
                     }
 
-                    $pane.appendTo($matrixmateFields);
+                    if (tabs[i]['render'] !== false && !hasRenderedSelectedTab) {
+                        hasRenderedSelectedTab = true;
+                        navClasses = ' sel';
+                    } else {
+                        paneClasses = ' hidden';
+                    }
+
+                    $pane.addClass(paneClasses).appendTo($matrixmateFields);
 
                     if (tabs[i]['render'] !== false) {
                         var $tabLi = $('<li/>').appendTo($tabs);

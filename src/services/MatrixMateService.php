@@ -205,10 +205,19 @@ class MatrixMateService extends Component
             }
             // Get tabs
             $tabs = $this->getTabsConfigFromArray($typeConfig);
+            // Get hidden fields
+            $hiddenFields = $typeConfig['hiddenFields'] ?? [];
+            if (\is_string($hiddenFields)) {
+                $hiddenFields = \explode(',', \preg_replace('/\s+/', '', $hiddenFields));
+            }
+            if (!$hiddenFields || !\is_array($hiddenFields)) {
+                $hiddenFields = [];
+            }
             $typeConfig = [
                 'tabs' => $tabs,
                 'defaultTabName' => $defaultTabName,
                 'maxLimit' => $maxLimit,
+                'hiddenFields' => $hiddenFields,
             ];
         }
         return $types;
