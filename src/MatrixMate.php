@@ -117,10 +117,15 @@ class MatrixMate extends Plugin
         if (\count($segments) >= 3 && $segments[0] === 'entries') {
             $entryType = null;
             if ($segments[2] === 'new') {
-                if ($section = Craft::$app->getSections()->getSectionByHandle($segments[1])) {
-                    $entryType = $section->getEntryTypes()[0] ?? null;
+                // New entry – check if there's a (valid) typeId param in the URL
+                $typeIdParam = (int)$request->getParam('typeId');
+                if (!$typeIdParam || !$entryType = Craft::$app->getSections()->getEntryTypeById($typeIdParam)) {
+                    // Nope, use the first one for the current section
+                    $section = Craft::$app->getSections()->getSectionByHandle($segments[1]);
+                    $entryType = $section ? $section->getEntryTypes()[0] : null;
                 }
             } else {
+                // Existing entry – get the entry and use its entry type
                 $entryId = (int)\explode('-', $segments[2])[0];
                 if ($entryId && $entry = Craft::$app->getEntries()->getEntryById($entryId)) {
                     $entryType = $entry->getType();
