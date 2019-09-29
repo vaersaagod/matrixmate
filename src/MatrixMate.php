@@ -134,7 +134,7 @@ class MatrixMate extends Plugin
             if ($entryType) {
                 $context = "entryType:{$entryType->id}";
             }
-            if (($segments[3] ?? null) === 'versions') {
+            if (($segments[3] ?? null) === 'versions' || !!$request->getParam('revisionId')) {
                 $isEntryVersion = true;
             }
         } else if (\count($segments) >= 3 && $segments[0] === 'categories') {
