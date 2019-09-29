@@ -15,6 +15,7 @@ use vaersaagod\matrixmate\MatrixMate;
 use Craft;
 use craft\base\Component;
 use craft\base\Field;
+use craft\elements\User;
 use craft\fields\Matrix;
 use craft\helpers\Json;
 use craft\services\Content;
@@ -129,7 +130,10 @@ class MatrixMateService extends Component
                         $entryTypeHandle = \explode(':', $context)[1] ?? null;
                         if ($entryTypeHandle && $entryTypes = Craft::$app->getSections()->getEntryTypesByHandle($entryTypeHandle)) {
                             foreach ($entryTypes as $entryType) {
-                                $settings["entryType:{$entryType->id}"] = $contextSettings;
+                                $settings["entryType:{$entryType->id}"] = [
+                                    'fieldLayoutId' => (int)$entryType->fieldLayoutId,
+                                    'config' => $contextSettings,
+                                ];
                             }
                             continue;
                         }
@@ -138,16 +142,42 @@ class MatrixMateService extends Component
                         if ($sectionHandle && $section = Craft::$app->getSections()->getSectionByHandle($sectionHandle)) {
                             $entryTypes = $section->getEntryTypes();
                             foreach ($entryTypes as $entryType) {
-                                if ($settings["entryType:{$entryType->handle}"] ?? null) {
+                                if ($settings["entryType:{$entryType->id}"] ?? null) {
                                     continue;
                                 }
-                                $settings["entryType:{$entryType->id}"] = $contextSettings;
+                                $settings["entryType:{$entryType->id}"] = [
+                                    'fieldLayoutId' => (int)$entryType->fieldLayoutId,
+                                    'config' => $contextSettings,
+                                ];
                             }
                             continue;
                         }
+                    } else if (\strpos($context, 'categoryGroup:') === 0) {
+                        $categoryGroupHandle = \explode(':', $context)[1] ?? null;
+                        if ($categoryGroupHandle && $categoryGroup = Craft::$app->getCategories()->getGroupByHandle($categoryGroupHandle)) {
+                            $settings["categoryGroup:{$categoryGroup->id}"] = [
+                                'fieldLayoutId' => (int)$categoryGroup->fieldLayoutId,
+                                'config' => $contextSettings,
+                            ];
+                        }
+                    } else if (\strpos($context, 'globalSet:') === 0) {
+                        $globalSetHandle = \explode(':', $context)[1] ?? null;
+                        if ($globalSetHandle && $globalSet = Craft::$app->getGlobals()->getSetByHandle($globalSetHandle)) {
+                            $settings["globalSet:{$globalSet->id}"] = [
+                                'fieldLayoutId' => (int)$globalSet->fieldLayoutId,
+                                'config' => $contextSettings,
+                            ];
+                        }
+                    } else if ($context === 'users') {
+                        $settings[$context] = [
+                            'fieldLayoutId' => (int)Craft::$app->getFields()->getLayoutByType(User::class)->id,
+                            'config' => $contextSettings,
+                        ];
+                    } else {
+                        $settings[$context] = [
+                            'config' => $contextSettings,
+                        ];
                     }
-
-                    $settings[$context] = $contextSettings;
 
                 }
 

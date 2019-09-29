@@ -33,6 +33,59 @@
                     }, this));
                 }
 
+                // Change context when the modal HUD is used to create a new entry
+                if (Craft.BaseElementEditor) {
+                    Garnish.on(
+                        Craft.BaseElementEditor,
+                        'showHud',
+                        $.proxy(function(e) {
+
+                            e.target._originalMatrixMateContext = this.settings.context;
+
+                            this.settings.context = '*';
+
+                            var typeId = (e.target.settings.attributes || {}).typeId;
+                            if (typeId) {
+                                this.settings.context = 'entryType:' + typeId;
+                                return;
+                            }
+
+                            var groupId = (e.target.settings.attributes || {}).groupId;
+                            if (groupId) {
+                                this.settings.context = 'categoryGroup:' + groupId;
+                                return;
+                            }
+
+                            var $form = e.target.$form;
+                            var fieldLayoutId = parseInt($form.find('input[type="hidden"][name$="[fieldLayoutId]"]').val(), 10);
+
+                            if (!fieldLayoutId) {
+                                return;
+                            }
+
+                            var fieldsConfig = this.settings.fieldsConfig || [];
+                            for (var fieldHandle in fieldsConfig) {
+                                for (var context in fieldsConfig[fieldHandle]) {
+                                    if (fieldLayoutId === (fieldsConfig[fieldHandle][context].fieldLayoutId || null)) {
+                                        this.settings.context = context;
+                                        return;
+                                    }
+                                }
+                            }
+                        }, this)
+                    );
+                    // ...and restore the previous context when the HUD closes
+                    Garnish.on(
+                        Craft.BaseElementEditor,
+                        'hideHud',
+                        $.proxy(function (e) {
+                            if (e.target._originalMatrixMateContext) {
+                                this.settings.context = e.target._originalMatrixMateContext;
+                            }
+                        }, this)
+                    );
+                }
+
                 // If this is a versioned entry, initialise existing blocks directly from the DOM
                 if (this.settings.isEntryVersion) {
                     Garnish.$doc.find('.matrix-field').each($.proxy(function (idx, field) {
@@ -62,6 +115,7 @@
                 var updateAddBlockBtnFn = Craft.MatrixInput.prototype.updateAddBlockBtn;
                 Craft.MatrixInput.prototype.updateAddBlockBtn = function () {
                     updateAddBlockBtnFn.apply(this, arguments);
+                    var $field = this.$container;
                     Garnish.requestAnimationFrame($.proxy(function () {
                         _this._maybeDisableBlockTypes(this.$container);
                     }, this));
@@ -564,7 +618,7 @@
                 if (!fieldConfig) {
                     return null;
                 }
-                config = fieldConfig[this.settings.context] || fieldConfig['*'] || null;
+                config = (fieldConfig[this.settings.context] || fieldConfig['*'] || {})['config'] || null;
                 $field.data('matrixmateconfig', config);
                 return config;
             },

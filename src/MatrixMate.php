@@ -10,20 +10,25 @@
 
 namespace vaersaagod\matrixmate;
 
-use craft\services\Fields;
-use craft\services\Sections;
-use craft\web\Application;
 use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
-use craft\helpers\Json;
-use craft\services\Plugins;
+use craft\elements\Category;
+use craft\elements\GlobalSet;
 use craft\events\PluginEvent;
-use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\Json;
+use craft\services\Categories;
+use craft\services\Fields;
+use craft\services\Globals;
+use craft\services\Plugins;
+use craft\services\Sections;
+use craft\services\Users;
+use craft\web\Application;
+use craft\web\UrlManager;
 
 use yii\base\Event;
 
@@ -85,7 +90,7 @@ class MatrixMate extends Plugin
     /**
      * @throws \yii\base\InvalidConfigException
      */
-    public function onAfterInit()
+    public function onAfterLoadPlugins()
     {
 
         $request = Craft::$app->getRequest();
@@ -97,17 +102,17 @@ class MatrixMate extends Plugin
         // Get the field config
         $fieldConfig = MatrixMate::$plugin->matrixMate->getFieldConfig();
         if (!$fieldConfig) {
+            // Bail early if no field config
             return;
         }
-
-        // Get context
-        $context = '*';
-        $isEntryVersion = false;
 
         $segments = $request->getSegments();
         if (empty($segments)) {
             return;
         }
+
+        $context = '*';
+        $isEntryVersion = false;
 
         if (\count($segments) >= 3 && $segments[0] === 'entries') {
             $entryType = null;
@@ -129,11 +134,11 @@ class MatrixMate extends Plugin
             }
         } else if (\count($segments) >= 3 && $segments[0] === 'categories') {
             if ($group = Craft::$app->getCategories()->getGroupByHandle($segments[1])) {
-                $context = "categoryGroup:{$group->handle}";
+                $context = "categoryGroup:{$group->id}";
             }
         } else if (\count($segments) >= 2 && $segments[0] === 'globals') {
             if ($globalSet = Craft::$app->getGlobals()->getSetByHandle($segments[\count($segments) - 1])) {
-                $context = "globalSet:{$globalSet->handle}";
+                $context = "globalSet:{$globalSet->id}";
             }
         } else if ($segments[0] == 'myaccount' || (\count($segments) === 2 && $segments[0] === 'users')) {
             $context = 'users';
@@ -153,7 +158,7 @@ class MatrixMate extends Plugin
     }
 
     /**
-     *
+     *  Clear the field config cache when something field related happens
      */
     public function onAfterSaveFieldContext()
     {
@@ -177,9 +182,15 @@ class MatrixMate extends Plugin
     protected function addEventListeners()
     {
         Event::on(
-            Application::class,
-            Application::EVENT_INIT,
-            [$this, 'onAfterInit']
+            Plugins::class,
+            Plugins::EVENT_AFTER_LOAD_PLUGINS,
+            [$this, 'onAfterLoadPlugins']
+        );
+
+        Event::on(
+            Fields::class,
+            Fields::EVENT_AFTER_SAVE_FIELD_LAYOUT,
+            [$this, 'onAfterSaveFieldContext']
         );
 
         Event::on(
@@ -203,6 +214,18 @@ class MatrixMate extends Plugin
         Event::on(
             Sections::class,
             Sections::EVENT_AFTER_SAVE_SECTION,
+            [$this, 'onAfterSaveFieldContext']
+        );
+
+        Event::on(
+            Categories::class,
+            Categories::EVENT_AFTER_SAVE_GROUP,
+            [$this, 'onAfterSaveFieldContext']
+        );
+
+        Event::on(
+            Globals::class,
+            Globals::EVENT_AFTER_SAVE_GLOBAL_SET,
             [$this, 'onAfterSaveFieldContext']
         );
     }
