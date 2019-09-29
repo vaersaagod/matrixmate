@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.2 - 2019-09-29
+### Fixed
+- Fixes an issue where MatrixMate could fail to apply the correct field config context in element editor modals. Fixes #10.
+- Fixes an issue where MatrixMate would hide block content when viewing entry revisions in Craft 3.2+. Fixes #11.
+- Fixes an issue where MatrixMate could fail to apply the correct field config context if the URL had a `typeId` query parameter.  
+
 ## 1.2.1 - 2019-09-04
 ### Fixed
 - Fixes an issue where MatrixMate could make Craft trigger the "Leave site?" confirm dialog, even if no fields in the entry form had been altered
