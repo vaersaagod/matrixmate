@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.3 - 2020-01-28
+### Fixed
+- Fixes Craft 3.4 compatibility issues  
+
 ## 1.2.2 - 2019-09-29
 ### Fixed
 - Fixes an issue where MatrixMate could fail to apply the correct field config context in element editor modals. Fixes #10.

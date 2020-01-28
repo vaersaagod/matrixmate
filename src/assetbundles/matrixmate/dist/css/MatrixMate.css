@@ -20,12 +20,8 @@
 
 .matrixmate-buttons {
     position: relative;
-    margin: 24px 0;
+    margin: 15px 0 24px 0;
     min-height: 30px;
-}
-
-.field:last-child .matrixmate-buttons {
-    margin-bottom: 36px;
 }
 
 .matrixmate-buttons:before {
@@ -101,21 +97,30 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
 .matrixmate-block-inited .matrixmate-tabs li a {
     display: block;
     padding: 5px 10px;
-    color: #777;
+    color: currentColor;
     white-space: nowrap;
+    opacity: 0.65;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+
+.matrixmate-block-inited .matrixmate-tabs li a:not(.sel) {
+    background-color: transparent !important;
 }
 
 .matrixmate-block-inited .matrixmate-tabs li a:hover {
     text-decoration: none;
-    color: #0d78f2;
+    opacity: 0.9;
 }
 
 .matrixmate-block-inited .matrixmate-tabs li a.sel {
-    color: #29323d;
-    background-color: #fbfcfd;
+    color: currentColor;
+    opacity: 1;
+    background-color: inherit;
     border-left: 1px solid #e3e5e8;
     border-right: 1px solid #e3e5e8;
-    border-bottom: 1px solid #fbfcfd;
+    position: relative;
 }
 
 .matrixmate-block-inited.disabled .matrixmate-tabs {

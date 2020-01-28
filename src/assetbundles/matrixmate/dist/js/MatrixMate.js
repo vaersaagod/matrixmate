@@ -262,7 +262,7 @@
                     }
 
                     // Get types for this group
-                    types = (groupsConfig[i]['types'] || []).filter(function (typeHandle) {
+                    var types = (groupsConfig[i]['types'] || []).filter(function (typeHandle) {
                         return hiddenTypes.indexOf(typeHandle) === -1;
                     });
                     if (!types.length) {
@@ -270,6 +270,11 @@
                     }
 
                     var $mainMenuBtn = $('<div class="btn menubtn">' + label + '</div>').appendTo($matrixmateButtons);
+
+                    if (this.settings.isCraft34) {
+                        $mainMenuBtn.addClass('dashed');
+                    }
+
                     var $mainMenu = $('<div class="menu matrixmate-menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
                     var $mainUl = $('<ul />').appendTo($mainMenu);
 
@@ -393,7 +398,7 @@
                     return;
                 }
 
-                var tabs = (typeConfig.tabs || []);
+                var tabs = [].concat(typeConfig.tabs || []);
                 var numTabs = tabs.length;
 
                 // If we have any hidden fields, we'll stick them in a hidden tab
@@ -418,10 +423,13 @@
                 });
 
                 var namespace = $field.prop('id') + '-' + $block.data('id');
+
                 var matrixmateNamespace = 'matrixmate-' + namespace;
 
                 var $tabs = $('<ul class="matrixmate-tabs"/>').appendTo($block);
+
                 var $fields = $block.find('> .fields');
+
                 var $matrixmateFields = $('<div class="matrixmate-fields"/>');
                 $fields.append($matrixmateFields);
 
@@ -429,6 +437,9 @@
                 var usedFields = [];
                 var tabIndex = 0;
                 var hasRenderedSelectedTab = false;
+
+                var blockColor = $block.css('backgroundColor');
+
                 for (var i = 0; i < tabs.length; i++) {
 
                     var navClasses = '';
@@ -440,6 +451,7 @@
                     $fields.find('> .field').each($.proxy(function (index, field) {
                         var $field = $(field);
                         var handle = this._getBlockFieldHandle($field);
+
                         if (!handle || usedFields.indexOf(handle) > -1) {
                             return;
                         }
@@ -482,6 +494,10 @@
                 if ($tabs.children().length <= 1) {
                     $tabs.hide();
                 }
+
+                $tabs.find('a').css({
+                    backgroundColor: blockColor
+                });
 
                 this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
 
@@ -602,7 +618,7 @@
             },
 
             _getBlockFieldHandle: function ($field) {
-                return $field.attr('id').split('-')[4] || null;
+                return $field.attr('id').split('-').reverse()[1] || null;
             },
 
             _getFieldConfig: function ($field) {
