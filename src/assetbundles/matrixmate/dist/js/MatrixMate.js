@@ -499,6 +499,8 @@
                     backgroundColor: blockColor
                 });
 
+                $block.addClass('matrixmate-has-tabs');
+
                 this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
 
             },

@@ -156,3 +156,7 @@ html.noscroll .matrixmate-settings-menu {
     overflow: hidden;
     max-height: none !important;
 }
+
+.matrixmate-has-tabs .titlebar {
+    border-bottom: 1px solid rgba(51, 64, 77, 0.1);
+}
