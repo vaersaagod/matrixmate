@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.5 - 2020-02-29
+### Fixed
+- Fixes an issue where MatrixMate could fail to apply the correct field config in multi-site setups
+
+### Improved
+- Removes the bottom border from Matrix blocks' titlebars for block types with tabs (P&T removed the native border in Craft 3.4.5 and then re-added it in 3.4.7)
+
 ## 1.2.4 - 2020-02-15
 ### Improved
 - Adds a bottom border to Matrix blocks' titlebars for block types with tabs (the native bottom border was removed in Craft 3.4.5) - thanks @umkasanki
