@@ -127,8 +127,13 @@ class MatrixMate extends Plugin
             } else {
                 // Existing entry – get the entry and use its entry type
                 $entryId = (int)\explode('-', $segments[2])[0];
-                if ($entryId && $entry = Craft::$app->getEntries()->getEntryById($entryId)) {
-                    $entryType = $entry->getType();
+                if ($entryId) {
+                    $siteHandle = $request->getParam('site');
+                    $site = $siteHandle ? Craft::$app->getSites()->getSiteByHandle($siteHandle) : null;
+                    $siteId = $site ? $site->id : null;
+                    if ($entry = Craft::$app->getEntries()->getEntryById($entryId, $siteId)) {
+                        $entryType = $entry->getType();
+                    }
                 }
             }
             if ($entryType) {
