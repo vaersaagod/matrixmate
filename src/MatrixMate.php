@@ -159,6 +159,7 @@ class MatrixMate extends Plugin
             'fieldsConfig' => $fieldConfig,
             'isEntryVersion' => $isEntryVersion,
             'isCraft34' => \version_compare(Craft::$app->getVersion(), '3.4.0', '>='),
+            'isCraft35' => \version_compare(Craft::$app->getVersion(), '3.5.0-RC1', '>='),
         ];
 
         $view = Craft::$app->getView();

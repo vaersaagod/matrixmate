@@ -127,6 +127,10 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
     right: 106px;
 }
 
+.matrixmate-block-inited.matrixmate-has-tabs > .titlebar {
+    border-bottom: 1px solid #E4E5E8;
+}
+
 .matrixmate-settings-menu h6 {
     margin-top: 10px;
     margin-bottom: 0;

@@ -428,10 +428,14 @@
 
                 var $tabs = $('<ul class="matrixmate-tabs"/>').appendTo($block);
 
-                var $fields = $block.find('> .fields');
+                var $fields;
+                if (this.settings.isCraft35) {
+                    $fields = $block.find('> .fields > .flex-fields');
+                } else {
+                    $fields = $block.find('> .fields');
+                }
 
-                var $matrixmateFields = $('<div class="matrixmate-fields"/>');
-                $fields.append($matrixmateFields);
+                $fields.addClass('matrixmate-fields');
 
                 // Create tabs
                 var usedFields = [];
@@ -448,6 +452,7 @@
                     var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" />');
 
                     var tabFieldHandles = tabs[i]['fields'] || [];
+
                     $fields.find('> .field').each($.proxy(function (index, field) {
                         var $field = $(field);
                         var handle = this._getBlockFieldHandle($field);
@@ -473,7 +478,7 @@
                         paneClasses = ' hidden';
                     }
 
-                    $pane.addClass(paneClasses).appendTo($matrixmateFields);
+                    $pane.addClass(paneClasses).appendTo($fields);
 
                     if (tabs[i]['render'] !== false) {
                         var $tabLi = $('<li/>').appendTo($tabs);
