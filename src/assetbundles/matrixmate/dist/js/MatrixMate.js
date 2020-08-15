@@ -435,7 +435,7 @@
                     $fields = $block.find('> .fields');
                 }
 
-                $fields.addClass('matrixmate-fields');
+                $fields.addClass('matrixmate-fields').removeClass('flex-fields');
 
                 // Create tabs
                 var usedFields = [];
@@ -449,7 +449,7 @@
                     var navClasses = '';
                     var paneClasses = '';
 
-                    var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" />');
+                    var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" class="flex-fields" />');
 
                     var tabFieldHandles = tabs[i]['fields'] || [];
 

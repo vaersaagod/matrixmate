@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.7 - 2020-08-15
+
+### Fixed
+- Fixes issue where custom field widths would not render inside MatrixMate's block type tabs
+
 ## 1.2.6 - 2020-07-30
 
 ### Fixed
