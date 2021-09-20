@@ -92,7 +92,7 @@ class MatrixMateService extends Component
                 continue;
             }
 
-            if (!empty(\array_intersect(['groups', 'types', 'hiddenTypes', 'hideUngroupedTypes', 'defaultTabName'], \array_keys($settings)))) {
+            if (!empty(\array_intersect(['groups', 'types', 'hiddenTypes', 'hideUngroupedTypes', 'defaultTabName', 'defaultTabFirst'], \array_keys($settings)))) {
                 $settings = ['*' => $settings];
             }
 
@@ -228,6 +228,8 @@ class MatrixMateService extends Component
             } else if (\is_string($defaultTabName)) {
                 $defaultTabName = Craft::t('site', $defaultTabName);
             }
+            // Get default tab position
+            $defaultTabFirst = $typeConfig['defaultTabFirst'] ?? $array['defaultTabFirst'] ?? false;
             // Get max limit
             $maxLimit = $typeConfig['maxLimit'] ?? null;
             if ($maxLimit !== null) {
@@ -246,6 +248,7 @@ class MatrixMateService extends Component
             $typeConfig = [
                 'tabs' => $tabs,
                 'defaultTabName' => $defaultTabName,
+                'defaultTabFirst' => $defaultTabFirst,
                 'maxLimit' => $maxLimit,
                 'hiddenFields' => $hiddenFields,
             ];
