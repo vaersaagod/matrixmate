@@ -180,7 +180,26 @@ return [
 ];
 ```
 
-This setting only applies to block types that are configured to use tabs, and can be overridden on a per-type basis (see `'types'` config section below).  
+This setting only applies to block types that are configured to use tabs, and can be overridden on a per-type basis (see `'types'` config section below).    
+
+#### defaultTabFirst [bool]
+*Default: `false`*  
+
+By default, the default tab will render *after* any custom tabs. To put the default tab first, set `defaultTabFirst` to `true`.  
+
+```php
+<?php
+
+return [
+    'fields' => [
+        'matrixFieldHandle' => [
+            ...
+            'defaultTabName' => 'Misc',
+            'defaultTabFirst' => true,
+        ],
+    ],
+];
+```
 
 #### groups [array]
 
