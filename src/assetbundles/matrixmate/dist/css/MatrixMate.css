@@ -77,6 +77,10 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
     opacity: 0 !important;
 }
 
+.matrixmate-fields .flex-fields > :before {
+    content: none !important;
+}
+
 .matrixmate-block-inited.collapsed .matrixmate-tabs {
     pointer-events: none;
 }
