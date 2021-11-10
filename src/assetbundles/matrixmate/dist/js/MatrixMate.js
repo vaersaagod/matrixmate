@@ -416,11 +416,17 @@
 
                 var renderDefaultTab = !!(typeConfig['defaultTabName'] || null) || (!numTabs && hiddenFields.length);
 
-                tabs.push({
+                var defaultTabOptions = {
                     label: typeConfig['defaultTabName'] || Craft.t('Fields'),
                     isDefaultTab: true,
                     render: renderDefaultTab
-                });
+                };
+
+                if (typeConfig['defaultTabFirst']) {
+                    tabs.unshift(defaultTabOptions);
+                } else {
+                    tabs.push(defaultTabOptions);
+                }
 
                 var namespace = $field.prop('id') + '-' + $block.data('id');
 
@@ -444,6 +450,11 @@
 
                 var blockColor = $block.css('backgroundColor');
 
+                // Get list of config tab fields
+                var tabFields = tabs.reduce(function(fields, group) {
+                    return group['fields'] ? fields.concat(group['fields']) : fields;
+                } , []);
+
                 for (var i = 0; i < tabs.length; i++) {
 
                     var navClasses = '';
@@ -461,6 +472,9 @@
                             return;
                         }
                         if (!tabs[i].isDefaultTab && tabFieldHandles.indexOf(handle) === -1) {
+                            return;
+                        }
+                        if (tabs[i].isDefaultTab && tabFields.indexOf(handle) > -1) {
                             return;
                         }
                         usedFields.push(handle);

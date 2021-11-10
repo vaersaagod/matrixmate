@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Fixed an issue where MatrixMate could apply the wrong config to a draft, if the draft had a different entry type than the canonical entry.
 - Fixed an issue where Matrix sub fields could render gray separator lines outside the Matrix field container, when using MatrixMate's tabs feature.
 
+### Added
+- Added the `defaultTabFirst` config setting for tabs, to allow displaying the default tab first
+
 ## 1.2.7 - 2020-08-15
 
 ### Fixed
