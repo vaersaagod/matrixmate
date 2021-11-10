@@ -10,25 +10,19 @@
 
 namespace vaersaagod\matrixmate;
 
-use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
-use vaersaagod\matrixmate\services\MatrixMateService;
-use vaersaagod\matrixmate\models\Settings;
-
 use Craft;
 use craft\base\Plugin;
-use craft\elements\Category;
-use craft\elements\GlobalSet;
-use craft\events\PluginEvent;
-use craft\events\RegisterUrlRulesEvent;
+use craft\elements\Entry;
 use craft\helpers\Json;
 use craft\services\Categories;
 use craft\services\Fields;
 use craft\services\Globals;
 use craft\services\Plugins;
 use craft\services\Sections;
-use craft\services\Users;
-use craft\web\Application;
-use craft\web\UrlManager;
+
+use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
+use vaersaagod\matrixmate\services\MatrixMateService;
+use vaersaagod\matrixmate\models\Settings;
 
 use yii\base\Event;
 
@@ -94,8 +88,9 @@ class MatrixMate extends Plugin
     {
 
         $request = Craft::$app->getRequest();
+        $user = Craft::$app->getUser();
 
-        if (!$this->isInstalled || !$request->getIsCpRequest() || $request->getAcceptsJson() || $request->getIsConsoleRequest() || !Craft::$app->getUser()->checkPermission('accessCp')) {
+        if (!$this->isInstalled || !$request->getIsCpRequest() || $request->getAcceptsJson() || $request->getIsConsoleRequest() || !$user->checkPermission('accessCp')) {
             return;
         }
 
@@ -118,7 +113,7 @@ class MatrixMate extends Plugin
             $entryType = null;
             if ($segments[2] === 'new') {
                 // New entry – check if there's a (valid) typeId param in the URL
-                $typeIdParam = (int)$request->getParam('typeId');
+                $typeIdParam = (int)$request->getParam('typeId', null);
                 if (!$typeIdParam || !$entryType = Craft::$app->getSections()->getEntryTypeById($typeIdParam)) {
                     // Nope, use the first one for the current section
                     $section = Craft::$app->getSections()->getSectionByHandle($segments[1]);
@@ -128,10 +123,22 @@ class MatrixMate extends Plugin
                 // Existing entry – get the entry and use its entry type
                 $entryId = (int)\explode('-', $segments[2])[0];
                 if ($entryId) {
-                    $siteHandle = $request->getParam('site');
+                    $siteHandle = $request->getParam('site', null);
                     $site = $siteHandle ? Craft::$app->getSites()->getSiteByHandle($siteHandle) : null;
-                    $siteId = $site ? $site->id : null;
-                    if ($entry = Craft::$app->getEntries()->getEntryById($entryId, $siteId)) {
+                    $siteId = $site ? $site->id : '*';
+                    $entryQuery = Entry::find()->siteId($siteId)->status(null);
+                    $draftId = (int)$request->getParam('draftId', null);
+                    if ($draftId) {
+                        // They're looking at a bona fide draft
+                        $draftsQuery = clone $entryQuery;
+                        $entry = $draftsQuery->draftOf($entryId)->draftId($draftId)->one();
+                    } else if (\version_compare(Craft::$app->getVersion(), '3.7.0', '>=')) {
+                        // If Craft 3.7+, look for provisional draft
+                        $provisionalDraftsQuery = clone $entryQuery;
+                        $entry = $provisionalDraftsQuery->provisionalDrafts()->draftCreator($user->identity)->draftOf($entryId)->one();
+                    }
+                    $entry = $entry ?? $entryQuery->id($entryId)->one();
+                    if ($entry) {
                         $entryType = $entry->getType();
                     }
                 }

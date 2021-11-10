@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.2.8 - 2021-09-20
+## Unreleased  
+
+### Fixed  
+- Fixed an issue where MatrixMate could apply the wrong config to a draft, if the draft had a different entry type than the canonical entry.  
 
 ### Added
 - Added the `defaultTabFirst` config setting for tabs, to allow displaying the default tab first
