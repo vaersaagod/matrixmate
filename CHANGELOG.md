@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased  
+## 1.3.0 - 2021-11-12  
 
 ### Fixed  
-- Fixed an issue where MatrixMate could apply the wrong config to a draft, if the draft had a different entry type than the canonical entry.
+- Fixed an issue where MatrixMate could apply the wrong config to a draft, if the draft was using a different entry type from the canonical entry.
 - Fixed an issue where Matrix sub fields could render gray separator lines outside the Matrix field container, when using MatrixMate's tabs feature.
 
 ### Added
