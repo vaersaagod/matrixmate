@@ -42,36 +42,61 @@
 
                             e.target._originalMatrixMateContext = this.settings.context;
 
-                            this.settings.context = '*';
+                            var updateEditorContext = $.proxy(function () {
 
-                            var typeId = (e.target.settings.attributes || {}).typeId;
-                            if (typeId) {
-                                this.settings.context = 'entryType:' + typeId;
-                                return;
-                            }
+                                this.settings.context = '*';
 
-                            var groupId = (e.target.settings.attributes || {}).groupId;
-                            if (groupId) {
-                                this.settings.context = 'categoryGroup:' + groupId;
-                                return;
-                            }
+                                var typeId = (e.target.settings.attributes || {}).typeId || null;
+                                if (typeId) {
+                                    this.settings.context = 'entryType:' + typeId;
+                                    return;
+                                }
 
-                            var $form = e.target.$form;
-                            var fieldLayoutId = parseInt($form.find('input[type="hidden"][name$="[fieldLayoutId]"]').val(), 10);
+                                var groupId = (e.target.settings.attributes || {}).groupId || null;
+                                if (groupId) {
+                                    this.settings.context = 'categoryGroup:' + groupId;
+                                    return;
+                                }
 
-                            if (!fieldLayoutId) {
-                                return;
-                            }
+                                var fieldLayoutId = null;
 
-                            var fieldsConfig = this.settings.fieldsConfig || [];
-                            for (var fieldHandle in fieldsConfig) {
-                                for (var context in fieldsConfig[fieldHandle]) {
-                                    if (fieldLayoutId === (fieldsConfig[fieldHandle][context].fieldLayoutId || null)) {
-                                        this.settings.context = context;
-                                        return;
+                                if (e.target.slideout) {
+                                    var $form = e.target.$body.parent('form.slideout');
+                                    if ($form.length) {
+                                        fieldLayoutId = parseInt($form.find('input[type="hidden"][name="fieldLayoutId"]').val(), 10);
+                                    }
+                                } else if (e.target.$form) {
+                                    fieldLayoutId = parseInt(e.target.$form.find('input[type="hidden"][name$="[fieldLayoutId]"]').val(), 10);
+                                }
+
+                                if (!fieldLayoutId) {
+                                    return;
+                                }
+
+                                var fieldsConfig = this.settings.fieldsConfig || [];
+                                for (var fieldHandle in fieldsConfig) {
+                                    for (var context in fieldsConfig[fieldHandle]) {
+                                        if (fieldLayoutId === (fieldsConfig[fieldHandle][context].fieldLayoutId || null)) {
+                                            this.settings.context = context;
+                                            return;
+                                        }
                                     }
                                 }
+
+                            }, this);
+
+                            updateEditorContext();
+
+                            if (e.target.on) {
+                                if (e.target.slideout) {
+                                    e.target.on('updateForm', updateEditorContext);
+                                } else {
+                                    e.target.on('endLoading', function () {
+                                        Garnish.requestAnimationFrame(updateEditorContext);
+                                    });
+                                }
                             }
+
                         }, this)
                     );
                     // ...and restore the previous context when the HUD closes
@@ -748,7 +773,9 @@
             },
 
             onMatrixInputInit: function (e) {
-                this.initField(e.target.$container);
+                Garnish.requestAnimationFrame($.proxy(function () {
+                    this.initField(e.target.$container);
+                }, this));
             },
 
             onMatrixInputBlockAdded: function (e) {

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.1 - 2021-11-16
+
+### Fixed  
+- Fixes a JavaScript error that could occur when opening element editor slideouts and HUDs  
+- Fixes a bug where the entry type switcher would not reload the MatrixMate config in element editor HUDs prior to Craft 3.7.x  
+- Fixes a bug where MatrixMate could fail to apply the correct config for entry types in element editor slideouts on Craft 3.7.x   
+
 ## 1.3.0 - 2021-11-12  
 
 ### Fixed  
