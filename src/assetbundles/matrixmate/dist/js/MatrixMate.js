@@ -150,16 +150,21 @@
                 Garnish.on(Craft.MatrixInput, 'afterInit', $.proxy(this.onMatrixInputInit, this));
                 Garnish.on(Craft.MatrixInput, 'blockAdded', $.proxy(this.onMatrixInputBlockAdded, this));
 
-                // If this is the draft editor (i.e. Entry editor for Craft 3.2+), then prevent beforeunload triggering unneccessarily after booting MatrixMate
-                if (window.draftEditor) {
-                    Garnish.requestAnimationFrame(function () {
-                        try {
-                            window.draftEditor.lastSerializedValue = window.draftEditor.serializeForm(true);
-                            Craft.cp.$primaryForm.data('initialSerializedValue', window.draftEditor.lastSerializedValue);
-                        } catch (error) {}
-                    });
-                }
+                this.overrideDraftEditorInitialSerializedValue();
 
+            },
+
+            overrideDraftEditorInitialSerializedValue: function () {
+                if (!window.draftEditor) {
+                    return;
+                }
+                setTimeout(function () {
+                    try {
+                        Craft.cp.$primaryForm.data('initialSerializedValue', window.draftEditor.serializeForm(true));
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }, 0);
             },
 
             // Initialises a Matrix field, including block type groups and tabs
@@ -187,6 +192,8 @@
                 $blocks.each($.proxy(function (index, block) {
                     this.initBlock($(block), $field);
                 }, this));
+
+                this.overrideDraftEditorInitialSerializedValue();
             },
 
             // Initialises a Matrix block, including the settings menu and tabs
