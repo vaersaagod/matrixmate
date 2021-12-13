@@ -30,6 +30,11 @@
                 if (Craft.EntryTypeSwitcher) {
                     Garnish.on(Craft.EntryTypeSwitcher, 'beforeTypeChange', $.proxy(function (e) {
                         this.settings.context = 'entryType:' + e.target.$typeSelect.val();
+                        setTimeout(function () {
+                            if (window.draftEditor) {
+                                window.draftEditor.checkForm();
+                            }
+                        }, 0);
                     }, this));
                 }
 
@@ -82,6 +87,8 @@
                                         }
                                     }
                                 }
+
+                                console.log(e.target);
 
                             }, this);
 
@@ -150,27 +157,43 @@
                 Garnish.on(Craft.MatrixInput, 'afterInit', $.proxy(this.onMatrixInputInit, this));
                 Garnish.on(Craft.MatrixInput, 'blockAdded', $.proxy(this.onMatrixInputBlockAdded, this));
 
-                this.overrideDraftEditorInitialSerializedValue();
+                this.maybeOverrideInitialSerializedForm(Craft.cp.$primaryForm || null);
 
             },
 
-            overrideDraftEditorInitialSerializedValue: function () {
-                if (!window.draftEditor) {
+            maybeOverrideInitialSerializedForm: function ($form) {
+                if (!$form.length) {
                     return;
                 }
-                setTimeout(function () {
-                    try {
-                        Craft.cp.$primaryForm.data('initialSerializedValue', window.draftEditor.serializeForm(true));
-                    } catch (error) {
-                        console.error(error);
-                    }
-                }, 0);
+                if (window.draftEditor && Craft.cp.$primaryForm && Craft.cp.$primaryForm.attr('id') === $form.attr('id')) {
+                    setTimeout(function () {
+                        try {
+                            Craft.cp.$primaryForm.data('initialSerializedValue', window.draftEditor.serializeForm(true));
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }, 0);
+                    return;
+                }
+                if ($form.data('elementEditor') && $form.data('elementEditor').slideout && !$form.data('matrixMateInitialized')) {
+                    $form.data('matrixMateInitialized', true);
+                    setTimeout(function () {
+                        try {
+                            $form.data('elementEditor').initialData = $form.data('elementEditor').slideout.$container.serialize();
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }, 0);
+                }
             },
 
             // Initialises a Matrix field, including block type groups and tabs
             initField: function ($field) {
 
+                var $form = $field.closest('form');
+
                 if ($field.hasClass('matrixmate-inited')) {
+                    this.maybeOverrideInitialSerializedForm($form);
                     return;
                 }
 
@@ -193,7 +216,7 @@
                     this.initBlock($(block), $field);
                 }, this));
 
-                this.overrideDraftEditorInitialSerializedValue();
+                this.maybeOverrideInitialSerializedForm($form);
             },
 
             // Initialises a Matrix block, including the settings menu and tabs
@@ -328,8 +351,15 @@
                             continue;
                         }
 
+                        // Check if the type should be disabled
+                        var typeConfig = this._getTypeConfig(type, $field) || {};
+                        var disable = typeConfig && typeConfig.maxLimit && this._countBlockByType(type, $field) >= typeConfig.maxLimit;
+
                         var $li = $('<li/>');
                         var $a = $('<a/>').attr('data-type', type).text($origTypeBtn.text());
+                        if (disable) {
+                            $a.addClass('disabled');
+                        }
 
                         $li.append($a).appendTo($mainUl);
                         $li.clone().appendTo($collapsedUl);

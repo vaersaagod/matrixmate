@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 1.3.3 - 2021-12-13
 ### Fixed
 - Fixes an issue where MatrixMate could make Craft create a provisional draft even if there were no changes to the entry edit form
+- Fixes an issue where MatrixMate could make the "Are you sure you want to close the editor?" confirm dialog appear in entry editor slideouts, even if there were no field changes
+- Fixes an issue where grouped types with a `maxLimit` setting would not have the proper styling on pageload if the max limit was reached     
 
 ## 1.3.2 - 2021-12-13
 ### Fixed  
