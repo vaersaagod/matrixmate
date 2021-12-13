@@ -131,7 +131,7 @@ class MatrixMate extends Plugin
                     if ($draftId) {
                         // They're looking at a bona fide draft
                         $draftsQuery = clone $entryQuery;
-                        $entry = $draftsQuery->draftOf($entryId)->draftId($draftId)->one();
+                        $entry = $draftsQuery->draftId($draftId)->one();
                     } else if (\version_compare(Craft::$app->getVersion(), '3.7.0', '>=')) {
                         // If Craft 3.7+, look for provisional draft
                         $provisionalDraftsQuery = clone $entryQuery;
