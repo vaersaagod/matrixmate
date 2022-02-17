@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.3.4 - 2022-02-17
+### Fixed  
 - Fixes an issue where MatrixMate was unable to initialise for Matrix block action menus on Craft 3.7.31+
 
 ## 1.3.3 - 2021-12-13
