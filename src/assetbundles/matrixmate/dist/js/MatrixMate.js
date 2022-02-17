@@ -88,8 +88,6 @@
                                     }
                                 }
 
-                                console.log(e.target);
-
                             }, this);
 
                             updateEditorContext();
@@ -586,24 +584,29 @@
 
             },
 
-            _initBlockSettingsMenu: function ($block, $field, fieldConfig) {
+            _initBlockSettingsMenu: function ($block, $field, fieldConfig, time) {
 
                 if (this.settings.isEntryVersion) {
                     return;
                 }
 
+                if (!time) {
+                    time = new Date().getTime();
+                }
+
                 Garnish.requestAnimationFrame($.proxy(function () {
 
                     var $settingsBtn = $block.find('.actions .settings.menubtn');
-                    var menuBtn = $settingsBtn.length ? $settingsBtn.data('menubtn') || null : null;
+                    var menuBtn = $settingsBtn.length ? ($settingsBtn.data('trigger') || $settingsBtn.data('menubtn') || null) : null;
 
                     if (!menuBtn) {
-                        this._initBlockSettingsMenu($block, $field, fieldConfig);
+                        if ((new Date().getTime()) - time < 1000) { // Give it a second
+                            this._initBlockSettingsMenu($block, $field, fieldConfig, time);
+                        }
                         return;
                     }
 
-
-                    var $menu = menuBtn.menu.$container || null;
+                    var $menu = menuBtn.$container || menuBtn.menu.$container || null;
                     if (!$menu) {
                         return;
                     }
@@ -768,12 +771,17 @@
 
                 // Update Add buttons in Garnish menus
                 var menuBtn;
+                var $container;
                 $field.find('> .buttons .btn.add.menubtn, > .matrixmate-buttons .btn.menubtn, .matrixblock .settings.menubtn').each(function () {
-                    menuBtn = $(this).data('menubtn');
+                    menuBtn = $(this).data('trigger') || $(this).data('menubtn');
                     if (!menuBtn) {
                         return;
                     }
-                    menuBtn.menu.$container.find('a[data-type="' + type + '"]').each(function () {
+                    $container = menuBtn.$container || menuBtn.menu.$container || null;
+                    if (!$container) {
+                        return;
+                    }
+                    $container.find('a[data-type="' + type + '"]').each(function () {
                         if (disable) {
                             $(this).addClass('disabled');
                         } else {
