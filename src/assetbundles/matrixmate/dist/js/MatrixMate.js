@@ -811,7 +811,6 @@
         },
 
         onMatrixInputInit: function (e) {
-            console.log('hey');
             Garnish.requestAnimationFrame($.proxy(function () {
                 this.initField(e.target.$container);
             }, this));
