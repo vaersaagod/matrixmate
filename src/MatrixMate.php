@@ -46,7 +46,7 @@ class MatrixMate extends Plugin
      * @var Settings
      * @see getSettings()
      */
-    private Settings $_settings;
+    private $_settings;
 
     /**
      * @inheritdoc
