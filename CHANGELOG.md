@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.0 - 2022-04-05
+### Improved
+- MatrixMate is now smarter about when and where to load its CSS and JS assets, and performance is improved. Resolves #44
+
+### Added
+- Added the `volume:{handle}` config context.
+
+### Changed
+- MatrixMate now requires Craft 3.7.x  
+
 ## 1.3.4 - 2022-02-17
 ### Fixed  
 - Fixes an issue where MatrixMate was unable to initialise for Matrix block action menus on Craft 3.7.31+

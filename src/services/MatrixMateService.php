@@ -18,7 +18,6 @@ use craft\base\Field;
 use craft\elements\User;
 use craft\fields\Matrix;
 use craft\helpers\Json;
-use craft\services\Content;
 
 /**
  * @author    Værsågod
@@ -37,33 +36,30 @@ class MatrixMateService extends Component
     public function getFieldConfigCacheKey(): string
     {
         $configFromFile = Json::encode(Craft::$app->getConfig()->getConfigFromFile('matrixmate'));
-        return 'matrixMateFieldConfig_' . \md5(MatrixMate::$plugin->getVersion() . $configFromFile);
+        return 'matrixMateFieldConfig_' . \md5(MatrixMate::getInstance()->getVersion() . $configFromFile);
     }
 
     /**
-     *
+     * @return void
      */
-    public function clearFieldConfigCache()
+    public function clearFieldConfigCache(): void
     {
-        Craft::$app->getCache()->set($this->getFieldConfigCacheKey(), null);
+        Craft::$app->getCache()->delete($this->getFieldConfigCacheKey());
     }
 
-    /*
-     * @return null|array
-     */
     /**
-     * @return array|mixed|null
+     * @return array|null
      */
-    public function getFieldConfig()
+    public function getFieldConfig(): ?array
     {
 
-        $isDevMode = !!Craft::$app->getConfig()->getGeneral()->devMode;
+        $isDevMode = Craft::$app->getConfig()->getGeneral()->devMode;
         $cache = Craft::$app->getCache();
         $cacheKey = $this->getFieldConfigCacheKey();
-        $cachedConfig = null;
 
         if ($isDevMode) {
-            Craft::$app->getCache()->set($cacheKey, null);
+            $cachedConfig = null;
+            $this->clearFieldConfigCache();
         } else {
             $cachedConfig = $cache->get($cacheKey);
         }
@@ -72,8 +68,8 @@ class MatrixMateService extends Component
             return $cachedConfig;
         }
 
-        $config = (MatrixMate::$plugin->getSettings() ?: [])['fields'] ?? null;
-        if (!$config || !\is_array($config) || empty($config)) {
+        $config = (MatrixMate::getInstance()->getSettings() ?: [])['fields'] ?? null;
+        if (empty($config) || !\is_array($config)) {
             return null;
         }
 
@@ -130,32 +126,30 @@ class MatrixMateService extends Component
                         $entryTypeHandle = \explode(':', $context)[1] ?? null;
                         if ($entryTypeHandle && $entryTypes = Craft::$app->getSections()->getEntryTypesByHandle($entryTypeHandle)) {
                             foreach ($entryTypes as $entryType) {
-                                $settings["entryType:{$entryType->id}"] = [
+                                $settings["entryType:$entryType->id"] = [
                                     'fieldLayoutId' => (int)$entryType->fieldLayoutId,
                                     'config' => $contextSettings,
                                 ];
                             }
-                            continue;
                         }
                     } else if (\strpos($context, 'section:') === 0) {
                         $sectionHandle = \explode(':', $context)[1] ?? null;
                         if ($sectionHandle && $section = Craft::$app->getSections()->getSectionByHandle($sectionHandle)) {
                             $entryTypes = $section->getEntryTypes();
                             foreach ($entryTypes as $entryType) {
-                                if ($settings["entryType:{$entryType->id}"] ?? null) {
+                                if ($settings["entryType:$entryType->id"] ?? null) {
                                     continue;
                                 }
-                                $settings["entryType:{$entryType->id}"] = [
+                                $settings["entryType:$entryType->id"] = [
                                     'fieldLayoutId' => (int)$entryType->fieldLayoutId,
                                     'config' => $contextSettings,
                                 ];
                             }
-                            continue;
                         }
                     } else if (\strpos($context, 'categoryGroup:') === 0) {
                         $categoryGroupHandle = \explode(':', $context)[1] ?? null;
                         if ($categoryGroupHandle && $categoryGroup = Craft::$app->getCategories()->getGroupByHandle($categoryGroupHandle)) {
-                            $settings["categoryGroup:{$categoryGroup->id}"] = [
+                            $settings["categoryGroup:$categoryGroup->id"] = [
                                 'fieldLayoutId' => (int)$categoryGroup->fieldLayoutId,
                                 'config' => $contextSettings,
                             ];
@@ -163,8 +157,16 @@ class MatrixMateService extends Component
                     } else if (\strpos($context, 'globalSet:') === 0) {
                         $globalSetHandle = \explode(':', $context)[1] ?? null;
                         if ($globalSetHandle && $globalSet = Craft::$app->getGlobals()->getSetByHandle($globalSetHandle)) {
-                            $settings["globalSet:{$globalSet->id}"] = [
+                            $settings["globalSet:$globalSet->id"] = [
                                 'fieldLayoutId' => (int)$globalSet->fieldLayoutId,
+                                'config' => $contextSettings,
+                            ];
+                        }
+                    } else if (\strpos($context, 'volume:') === 0) {
+                        $volumeHandle = \explode(':', $context)[1] ?? null;
+                        if ($volumeHandle && $volume = Craft::$app->getVolumes()->getVolumeByHandle($volumeHandle)) {
+                            $settings["volume:$volume->id"] = [
+                                'fieldLayoutId' => (int)$volume->fieldLayoutId,
                                 'config' => $contextSettings,
                             ];
                         }
@@ -195,7 +197,7 @@ class MatrixMateService extends Component
      * @param array $array
      * @return array|null
      */
-    protected function getGroupsConfigFromArray(array $array)
+    protected function getGroupsConfigFromArray(array $array): ?array
     {
         $groups = $array['groups'] ?? null;
         if (!$groups || !\is_array($groups)) {
@@ -212,9 +214,9 @@ class MatrixMateService extends Component
 
     /**
      * @param array $array
-     * @return mixed|null
+     * @return array|null
      */
-    protected function getTypesConfigFromArray(array $array)
+    protected function getTypesConfigFromArray(array $array): ?array
     {
         $types = $array['types'] ?? null;
         if (!$types || !\is_array($types)) {
@@ -258,9 +260,9 @@ class MatrixMateService extends Component
 
     /**
      * @param array $array
-     * @return mixed|null
+     * @return array|null
      */
-    protected function getTabsConfigFromArray(array $array)
+    protected function getTabsConfigFromArray(array $array): ?array
     {
         $tabs = $array['tabs'] ?? null;
         if (!$tabs || !\is_array($tabs)) {

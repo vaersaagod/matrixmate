@@ -2,7 +2,7 @@
     "name": "vaersaagod/matrixmate",
     "description": "Welding Matrix into shape, mate!",
     "type": "craft-plugin",
-    "version": "1.3.4",
+    "version": "1.4.0",
     "keywords": [
         "craft",
         "cms",
@@ -22,7 +22,8 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0"
+        "craftcms/cms": "^3.7.0",
+        "php": "^7.2.5|^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -32,6 +33,7 @@
     "extra": {
         "name": "MatrixMate",
         "handle": "matrixmate",
+        "schemaVersion": "1.0.0",
         "hasCpSettings": false,
         "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/vaersaagod/matrixmate/master/CHANGELOG.md",

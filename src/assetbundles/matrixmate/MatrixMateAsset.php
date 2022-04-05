@@ -10,13 +10,8 @@
 
 namespace vaersaagod\matrixmate\assetbundles\matrixmate;
 
-use Craft;
-use craft\helpers\Json;
 use craft\web\AssetBundle;
 use craft\web\assets\matrix\MatrixAsset;
-use craft\web\View;
-
-use vaersaagod\matrixmate\MatrixMate;
 
 /**
  * @author    Værsågod

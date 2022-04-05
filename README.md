@@ -6,7 +6,7 @@ Welding Matrix into shape, mate!
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0 or later.
+This plugin requires Craft CMS 3.7.0 or later.
 
 ## Installation
 
@@ -127,11 +127,12 @@ Additionally, a "global" config that will apply everywhere else is added using t
 
 #### Supported contexts
 
-`section:{handle}` - Apply to all entry types for a particular Section  
-`entryType:{handle}` - Apply to a particular Entry Type  
-`categoryGroup:{handle}` - Apply to a particular Category Group  
-`globalSet:{handle}` - Apply to a particular Global Set  
-`users` - Apply to User account settings pages  
+`section:{handle}` - Apply for all entry types in a particular section  
+`entryType:{handle}` - Apply for entries with a particular entry type  
+`categoryGroup:{handle}` - Apply for categories in a particular category group  
+`globalSet:{handle}` - Apply for a particular global set  
+`volume:{handle}` - Apply for assets in a particular volume
+`users` - Apply for user account edit pages  
 
 ### Configuration settings
 
