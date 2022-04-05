@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.1 - 2022-04-05
+### Improved
+- Fixes some minor styling issues on Craft 3.7+
+
 ## 1.4.0 - 2022-04-05
 ### Improved
 - MatrixMate is now smarter about when and where to load its CSS and JS assets, and performance is improved. Resolves #44
