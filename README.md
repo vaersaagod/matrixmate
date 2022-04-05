@@ -131,7 +131,7 @@ Additionally, a "global" config that will apply everywhere else is added using t
 `entryType:{handle}` - Apply for entries with a particular entry type  
 `categoryGroup:{handle}` - Apply for categories in a particular category group  
 `globalSet:{handle}` - Apply for a particular global set  
-`volume:{handle}` - Apply for assets in a particular volume
+`volume:{handle}` - Apply for assets in a particular volume  
 `users` - Apply for user account edit pages  
 
 ### Configuration settings
