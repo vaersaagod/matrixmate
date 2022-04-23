@@ -56,9 +56,6 @@ class MatrixMate extends Plugin
      */
     private ?Settings $_settings = null;
 
-    /** @var int|null */
-    private ?int $_elementId = null;
-
     /**
      * @inheritdoc
      */
@@ -212,7 +209,6 @@ class MatrixMate extends Plugin
 if (Craft && Craft.MatrixMate) {
     Craft.MatrixMate.fieldConfig = $configJs;
     Craft.MatrixMate.initPrimaryForm($elementId, '$context');
-    //Craft.MatrixMate.setContextForElement($elementId, '$context');
 }
 JS;
         Craft::$app->getView()->registerAssetBundle(MatrixMateAsset::class, \yii\web\View::POS_END);
