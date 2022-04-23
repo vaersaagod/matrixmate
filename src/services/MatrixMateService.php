@@ -274,6 +274,6 @@ class MatrixMateService extends Component
                 'fields' => $tab['fields'] ?? $tab,
             ];
         }
-        return $tabs;
+        return array_values($tabs);
     }
 }
