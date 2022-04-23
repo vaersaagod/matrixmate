@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased  
+### Added  
+- Adds Craft 4.0 compatibility  
+- Adds support for using associative arrays in tabs config  
+### Changed
+- MatrixMate no longer loads at all for revisions. It was pretty pointless, anyway.
+- MatrixMate now requires Craft 4.0.0-beta.4 or later
+
 ## 1.4.2 - 2022-04-23
 ### Improved
 - It's now possible to use associative arrays for tabs config. Thanks @timrosskamp

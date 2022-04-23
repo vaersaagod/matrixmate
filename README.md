@@ -1,4 +1,4 @@
-# MatrixMate plugin for Craft CMS 3.x
+# MatrixMate plugin for Craft CMS 4.x
 
 Welding Matrix into shape, mate!  
 

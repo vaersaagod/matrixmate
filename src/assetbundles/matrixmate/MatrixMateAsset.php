@@ -1,6 +1,6 @@
 <?php
 /**
- * MatrixMate plugin for Craft CMS 3.x
+ * MatrixMate plugin for Craft CMS 4.x
  *
  * Welding Matrix into shape, mate!
  *
@@ -10,8 +10,11 @@
 
 namespace vaersaagod\matrixmate\assetbundles\matrixmate;
 
+use craft\helpers\Json;
 use craft\web\AssetBundle;
 use craft\web\assets\matrix\MatrixAsset;
+use craft\web\View;
+use vaersaagod\matrixmate\MatrixMate;
 
 /**
  * @author    Værsågod

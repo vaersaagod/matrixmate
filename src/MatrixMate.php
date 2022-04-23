@@ -1,6 +1,6 @@
 <?php
 /**
- * MatrixMate plugin for Craft CMS 3.x
+ * MatrixMate plugin for Craft CMS 4.x
  *
  * Welding Matrix into shape, mate!
  *
@@ -15,14 +15,22 @@ use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
 use craft\elements\Category;
+use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use craft\elements\GlobalSet;
 use craft\elements\User;
+use craft\events\DefineHtmlEvent;
+use craft\events\PopulateElementEvent;
+use craft\events\TemplateEvent;
 use craft\helpers\Json;
 use craft\services\Fields;
 use craft\services\Plugins;
 use craft\web\Controller;
 
+use craft\web\CpScreenResponseFormatter;
+use craft\web\Request;
+use craft\web\Response;
+use craft\web\View;
 use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
@@ -43,10 +51,13 @@ class MatrixMate extends Plugin
 {
 
     /**
-     * @var Settings
+     * @var Settings|null
      * @see getSettings()
      */
-    private $_settings;
+    private ?Settings $_settings = null;
+
+    /** @var int|null */
+    private ?int $_elementId = null;
 
     /**
      * @inheritdoc
@@ -66,13 +77,16 @@ class MatrixMate extends Plugin
         ]);
 
         // Clear the field config cache when something field related happens
-        foreach ([
-             Fields::EVENT_AFTER_SAVE_FIELD_LAYOUT => Fields::class,
-             Fields::EVENT_AFTER_DELETE_FIELD_LAYOUT => Fields::class,
-             Fields::EVENT_AFTER_SAVE_FIELD => Fields::class,
-             Fields::EVENT_AFTER_DELETE_FIELD => Fields::class,
-        ] as $event => $class) {
-            Event::on($class, $event, [$this->matrixMate, 'clearFieldConfigCache']);
+        $events = [
+            Fields::EVENT_AFTER_SAVE_FIELD_LAYOUT => Fields::class,
+            Fields::EVENT_AFTER_DELETE_FIELD_LAYOUT => Fields::class,
+            Fields::EVENT_AFTER_SAVE_FIELD => Fields::class,
+            Fields::EVENT_AFTER_DELETE_FIELD => Fields::class,
+        ];
+        foreach ($events as $event => $class) {
+            Event::on($class, $event, function (): void {
+                $this->matrixMate->clearFieldConfigCache();
+            });
         }
 
         // Defer further initialisation to after plugins have loaded, and only for CP web requests
@@ -80,23 +94,21 @@ class MatrixMate extends Plugin
             Event::on(
                 Plugins::class,
                 Plugins::EVENT_AFTER_LOAD_PLUGINS,
-                [$this, 'onAfterLoadPlugins']
+                function (): void {
+                    $this->onAfterLoadPlugins();
+                }
             );
         }
 
         Craft::info(
             Craft::t(
                 'matrixmate',
-                '{name} plugin loaded',
-                ['name' => $this->name]
+                'MatrixMate plugin loaded'
             ),
             __METHOD__
         );
     }
 
-    /**
-     * @return void
-     */
     public function onAfterLoadPlugins(): void
     {
 
@@ -104,40 +116,30 @@ class MatrixMate extends Plugin
             return;
         }
 
-        // Entries, assets and categories
-        Craft::$app->getView()->hook('cp.elements.edit', function (array $context) {
-            $this->registerAssetBundleForElement($context['element'] ?? null);
-        });
-
-        // Users
-        Craft::$app->getView()->hook('cp.users.edit', function (array $context) {
-            $this->registerAssetBundleForElement($context['user'] ?? null);
-        });
-
-        // Global sets
-        Craft::$app->getView()->hook('cp.globals.edit', function (array $context) {
-            $this->registerAssetBundleForElement($context['globalSet'] ?? null);
-        });
-
-        // Slideouts
+        // Register asset bundle for elements with a sidebar (i.e. entries, assets, categories)
         Event::on(
-            Controller::class,
-            \yii\base\Controller::EVENT_BEFORE_ACTION,
-            function (ActionEvent $event) {
-                $action = $event->action;
-                if ($action->id !== 'get-editor-html') {
-                    return;
-                }
-                $request = $action->controller->request;
-                $elementId = (int)$request->getBodyParam('elementId');
-                $elementType = $request->getBodyParam('elementType');
-                $siteId = (int)$request->getBodyParam('siteId');
-                if ($elementId && $elementType && $siteId) {
-                    $element = Craft::$app->getElements()->getElementById($elementId, $elementType, $siteId);
-                    $this->registerAssetBundleForElement($element);
-                }
+            Element::class,
+            Element::EVENT_DEFINE_SIDEBAR_HTML,
+            function (DefineHtmlEvent $event) {
+                /** @var Element $element */
+                $element = $event->sender;
+                $this->registerAssetBundleForElement($element);
             }
         );
+
+        // Register asset bundle for users
+        Craft::$app->getView()->hook('cp.users.edit', function (array $context) {
+            /** @var Element|null $element */
+            $element = $context['user'] ?? null;
+            $this->registerAssetBundleForElement($element);
+        });
+
+        // Register asset bundle for global sets
+        Craft::$app->getView()->hook('cp.globals.edit', function (array $context) {
+            /** @var Element|null $element */
+            $element = $context['globalSet'] ?? null;
+            $this->registerAssetBundleForElement($element);
+        });
 
     }
 
@@ -146,7 +148,7 @@ class MatrixMate extends Plugin
      */
     public function getSettings(): Settings
     {
-        if (!isset($this->_settings)) {
+        if ($this->_settings === null) {
             $this->_settings = $this->createSettingsModel();
         }
         return $this->_settings;
@@ -164,38 +166,57 @@ class MatrixMate extends Plugin
     }
 
     /**
+     * @param Element $element
+     * @return string
+     */
+    protected function getContextForElement(Element $element): string
+    {
+        if ($element instanceof Entry) {
+            $context = "entryType:$element->typeId";
+        } elseif ($element instanceof Category) {
+            $context = "categoryGroup:$element->groupId";
+        } elseif ($element instanceof Asset) {
+            $context = "volume:{$element->getVolumeId()}";
+        } elseif ($element instanceof GlobalSet) {
+            $context = "globalSet:$element->id";
+        } elseif ($element instanceof User) {
+            $context = 'users';
+        } else {
+            $context = '*';
+        }
+        return $context;
+    }
+
+    /**
      * @param Element|null $element
      * @return void
      * @throws \yii\base\InvalidConfigException
      */
     protected function registerAssetBundleForElement(?Element $element): void
     {
-        if (!$element || !$fieldsConfig = MatrixMate::getInstance()->matrixMate->getFieldConfig()) {
+
+        if (!$element || $element->getIsRevision() || !$fieldConfig = $this->matrixMate->getFieldConfig()) {
             return;
         }
 
-        $context = '*';
+        $elementId = (int)($element->draftId ?? $element->canonicalId ?? $element->id);
 
-        if ($element instanceof Entry) {
-            $context = "entryType:$element->typeId";
-        } else if ($element instanceof Category) {
-            $context = "categoryGroup:$element->groupId";
-        } else if ($element instanceof Asset) {
-            $context = "volume:$element->volumeId";
-        } else if ($element instanceof GlobalSet) {
-            $context = "globalSet:$element->handle";
-        } else if ($element instanceof User) {
-            $context = 'users';
+        if (!$elementId) {
+            return;
         }
 
-        $settings = [
-            'context' => $context,
-            'fieldsConfig' => $fieldsConfig,
-            'isRevision' => (bool)$element->revisionId,
-        ];
+        $context = $this->getContextForElement($element);
+        $configJs = Json::encode($fieldConfig, JSON_UNESCAPED_UNICODE);
 
+        $js = <<<JS
+if (Craft && Craft.MatrixMate) {
+    Craft.MatrixMate.fieldConfig = $configJs;
+    Craft.MatrixMate.initPrimaryForm($elementId, '$context');
+    //Craft.MatrixMate.setContextForElement($elementId, '$context');
+}
+JS;
         Craft::$app->getView()->registerAssetBundle(MatrixMateAsset::class, \yii\web\View::POS_END);
-        Craft::$app->getView()->registerJs('if (Craft && Craft.MatrixMate) { new Craft.MatrixMate(' . Json::encode($settings, JSON_UNESCAPED_UNICODE) . '); }', \yii\web\View::POS_END);
+        Craft::$app->getView()->registerJs($js, \yii\web\View::POS_END);
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * MatrixMate plugin for Craft CMS 3.x
+ * MatrixMate plugin for Craft CMS 4.x
  *
  * Welding Matrix into shape, mate!
  *
@@ -26,9 +26,6 @@ use craft\helpers\Json;
  */
 class MatrixMateService extends Component
 {
-
-    // Public Methods
-    // =========================================================================
 
     /**
      * @return string
@@ -106,7 +103,7 @@ class MatrixMateService extends Component
                 $contextSettings['types'] = $this->getTypesConfigFromArray($contextSettings);
 
                 // Hide ungrouped types?
-                $contextSettings['hideUngroupedTypes'] = !!($contextSettings['hideUngroupedTypes'] ?? false);
+                $contextSettings['hideUngroupedTypes'] = (bool) ($contextSettings['hideUngroupedTypes'] ?? false);
 
                 // Explicitly hidden types
                 $hiddenTypes = $contextSettings['hiddenTypes'] ?? null;
@@ -122,17 +119,14 @@ class MatrixMateService extends Component
                 foreach ($contextArray as $context) {
 
                     // Parse contexts
-                    if (\strpos($context, 'entryType:') === 0) {
+                    if (str_starts_with($context, 'entryType:')) {
                         $entryTypeHandle = \explode(':', $context)[1] ?? null;
                         if ($entryTypeHandle && $entryTypes = Craft::$app->getSections()->getEntryTypesByHandle($entryTypeHandle)) {
                             foreach ($entryTypes as $entryType) {
-                                $settings["entryType:$entryType->id"] = [
-                                    'fieldLayoutId' => (int)$entryType->fieldLayoutId,
-                                    'config' => $contextSettings,
-                                ];
+                                $settings["entryType:$entryType->id"] = $contextSettings;
                             }
                         }
-                    } else if (\strpos($context, 'section:') === 0) {
+                    } elseif (str_starts_with($context, 'section:')) {
                         $sectionHandle = \explode(':', $context)[1] ?? null;
                         if ($sectionHandle && $section = Craft::$app->getSections()->getSectionByHandle($sectionHandle)) {
                             $entryTypes = $section->getEntryTypes();
@@ -140,45 +134,28 @@ class MatrixMateService extends Component
                                 if ($settings["entryType:$entryType->id"] ?? null) {
                                     continue;
                                 }
-                                $settings["entryType:$entryType->id"] = [
-                                    'fieldLayoutId' => (int)$entryType->fieldLayoutId,
-                                    'config' => $contextSettings,
-                                ];
+                                $settings["entryType:$entryType->id"] = $contextSettings;
                             }
                         }
-                    } else if (\strpos($context, 'categoryGroup:') === 0) {
+                    } elseif (str_starts_with($context, 'categoryGroup:')) {
                         $categoryGroupHandle = \explode(':', $context)[1] ?? null;
                         if ($categoryGroupHandle && $categoryGroup = Craft::$app->getCategories()->getGroupByHandle($categoryGroupHandle)) {
-                            $settings["categoryGroup:$categoryGroup->id"] = [
-                                'fieldLayoutId' => (int)$categoryGroup->fieldLayoutId,
-                                'config' => $contextSettings,
-                            ];
+                            $settings["categoryGroup:$categoryGroup->id"] = $contextSettings;
                         }
-                    } else if (\strpos($context, 'globalSet:') === 0) {
+                    } elseif (str_starts_with($context, 'globalSet:')) {
                         $globalSetHandle = \explode(':', $context)[1] ?? null;
                         if ($globalSetHandle && $globalSet = Craft::$app->getGlobals()->getSetByHandle($globalSetHandle)) {
-                            $settings["globalSet:$globalSet->id"] = [
-                                'fieldLayoutId' => (int)$globalSet->fieldLayoutId,
-                                'config' => $contextSettings,
-                            ];
+                            $settings["globalSet:$globalSet->id"] = $contextSettings;
                         }
-                    } else if (\strpos($context, 'volume:') === 0) {
+                    } elseif (str_starts_with($context, 'volume:')) {
                         $volumeHandle = \explode(':', $context)[1] ?? null;
                         if ($volumeHandle && $volume = Craft::$app->getVolumes()->getVolumeByHandle($volumeHandle)) {
-                            $settings["volume:$volume->id"] = [
-                                'fieldLayoutId' => (int)$volume->fieldLayoutId,
-                                'config' => $contextSettings,
-                            ];
+                            $settings["volume:$volume->id"] = $contextSettings;
                         }
-                    } else if ($context === 'users') {
-                        $settings[$context] = [
-                            'fieldLayoutId' => (int)Craft::$app->getFields()->getLayoutByType(User::class)->id,
-                            'config' => $contextSettings,
-                        ];
+                    } elseif ($context === 'users') {
+                        $settings[$context] = $contextSettings;
                     } else {
-                        $settings[$context] = [
-                            'config' => $contextSettings,
-                        ];
+                        $settings[$context] = $contextSettings;
                     }
 
                 }
@@ -222,12 +199,12 @@ class MatrixMateService extends Component
         if (!$types || !\is_array($types)) {
             return null;
         }
-        foreach ($types as $typeHandle => &$typeConfig) {
+        foreach ($types as &$typeConfig) {
             // Get default tab name
             $defaultTabName = $typeConfig['defaultTabName'] ?? $array['defaultTabName'] ?? null;
             if ((!$defaultTabName || !\is_string($defaultTabName)) && $defaultTabName !== false) {
                 $defaultTabName = Craft::t('site', 'Fields');
-            } else if (\is_string($defaultTabName)) {
+            } elseif (\is_string($defaultTabName)) {
                 $defaultTabName = Craft::t('site', $defaultTabName);
             }
             // Get default tab position
@@ -274,6 +251,6 @@ class MatrixMateService extends Component
                 'fields' => $tab['fields'] ?? $tab,
             ];
         }
-        return array_values($tabs);
+        return \array_values($tabs);
     }
 }

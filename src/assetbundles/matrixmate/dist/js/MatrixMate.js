@@ -20,339 +20,88 @@
         return;
     }
 
-    Craft.MatrixMate = Garnish.Base.extend({
+    const MATRIX_MATE_KEY = 'matrixMate';
 
-        init: function (settings) {
-
-            this.setSettings(settings, Craft.MatrixMate.defaults);
-
-            // Change context when the entry type changes
-            if (Craft.EntryTypeSwitcher) {
-                Garnish.on(Craft.EntryTypeSwitcher, 'beforeTypeChange', $.proxy(function (e) {
-                    this.settings.context = 'entryType:' + e.target.$typeSelect.val();
-                    setTimeout(function () {
-                        if (window.draftEditor) {
-                            window.draftEditor.checkForm();
-                        }
-                    }, 0);
-                }, this));
+    Craft.MatrixMateField = Garnish.Base.extend({
+        init($field) {
+            this.$field = $field;
+            this.matrix = this.$field.data('matrix');
+            this.$form = this.matrix.$form;
+            this.config = Craft.MatrixMate.getConfigForField(this.$field, this.$form.data('matrixMateContext'));
+            this.$field.addClass('matrixmate-inited');
+            if (!this.config) {
+                return;
             }
-
-            // Change context when the modal HUD is used to create a new entry
-            if (Craft.BaseElementEditor) {
-                Garnish.on(
-                    Craft.BaseElementEditor,
-                    'showHud',
-                    $.proxy(function (e) {
-
-                        e.target._originalMatrixMateContext = this.settings.context;
-
-                        var updateEditorContext = $.proxy(function () {
-
-                            this.settings.context = '*';
-
-                            var typeId = (e.target.settings.attributes || {}).typeId || null;
-                            if (typeId) {
-                                this.settings.context = 'entryType:' + typeId;
-                                return;
-                            }
-
-                            var groupId = (e.target.settings.attributes || {}).groupId || null;
-                            if (groupId) {
-                                this.settings.context = 'categoryGroup:' + groupId;
-                                return;
-                            }
-
-                            var fieldLayoutId = null;
-
-                            if (e.target.slideout) {
-                                var $form = e.target.$body.parent('form.slideout');
-                                if ($form.length) {
-                                    fieldLayoutId = parseInt($form.find('input[type="hidden"][name="fieldLayoutId"]').val(), 10);
-                                }
-                            } else if (e.target.$form) {
-                                fieldLayoutId = parseInt(e.target.$form.find('input[type="hidden"][name$="[fieldLayoutId]"]').val(), 10);
-                            }
-
-                            if (!fieldLayoutId) {
-                                return;
-                            }
-
-                            var fieldsConfig = this.settings.fieldsConfig || [];
-                            for (var fieldHandle in fieldsConfig) {
-                                for (var context in fieldsConfig[fieldHandle]) {
-                                    if (fieldLayoutId === (fieldsConfig[fieldHandle][context].fieldLayoutId || null)) {
-                                        this.settings.context = context;
-                                        return;
-                                    }
-                                }
-                            }
-
-                        }, this);
-
-                        updateEditorContext();
-
-                        if (e.target.on) {
-                            if (e.target.slideout) {
-                                e.target.on('updateForm', updateEditorContext);
-                            } else {
-                                e.target.on('endLoading', function () {
-                                    Garnish.requestAnimationFrame(updateEditorContext);
-                                });
-                            }
-                        }
-
-                    }, this)
-                );
-                // ...and restore the previous context when the HUD closes
-                Garnish.on(
-                    Craft.BaseElementEditor,
-                    'hideHud',
-                    $.proxy(function (e) {
-                        if (e.target._originalMatrixMateContext) {
-                            this.settings.context = e.target._originalMatrixMateContext;
-                        }
-                    }, this)
-                );
-            }
-
-            // If this is a versioned entry, initialise existing blocks directly from the DOM
-            if (this.settings.isRevision) {
-                Garnish.$doc.find('.matrix-field').each($.proxy(function (idx, field) {
-                    this.initField($(field));
-                }, this));
-            }
-
-            // Override the native MatrixInput::addBlock() method
-            var _this = this;
-            var addBlockFn = Craft.MatrixInput.prototype.addBlock;
-            Craft.MatrixInput.prototype.addBlock = function (type, $insertBefore) {
-                var $field = this.$container;
-                var typeConfig = _this._getTypeConfig(type, $field);
-                if (typeConfig) {
-                    var maxLimit = typeConfig.maxLimit;
-                    if (maxLimit !== undefined && maxLimit != null && _this._countBlockByType(type, $field) >= maxLimit) {
-                        return;
-                    }
-                }
-                addBlockFn.apply(this, arguments);
-                Garnish.requestAnimationFrame($.proxy(function () {
-                    _this._maybeDisableBlockType(type, $field);
-                }, this));
-            }
-
-            // Override the native MatrixInput::updateAddBlockBtn method
-            var updateAddBlockBtnFn = Craft.MatrixInput.prototype.updateAddBlockBtn;
-            Craft.MatrixInput.prototype.updateAddBlockBtn = function () {
-                updateAddBlockBtnFn.apply(this, arguments);
-                var $field = this.$container;
-                Garnish.requestAnimationFrame($.proxy(function () {
-                    _this._maybeDisableBlockTypes(this.$container);
-                }, this));
-            }
-
-            // Add event listeners
-            Garnish.on(Craft.MatrixInput, 'afterInit', $.proxy(this.onMatrixInputInit, this));
-            Garnish.on(Craft.MatrixInput, 'blockAdded', $.proxy(this.onMatrixInputBlockAdded, this));
-
-            this.maybeOverrideInitialSerializedForm(Craft.cp.$primaryForm || null);
-
+            this.initBlockTypeGroups();
+            this.hideBlockTypes();
+            this.initBlocks();
+            this.maybeDisableBlockTypes();
+            this.$field.data(MATRIX_MATE_KEY, this);
         },
+        initBlockTypeGroups() {
 
-        maybeOverrideInitialSerializedForm: function ($form) {
-            if (!$form.length) {
-                return;
-            }
-            if (window.draftEditor && Craft.cp.$primaryForm && Craft.cp.$primaryForm.attr('id') === $form.attr('id')) {
-                setTimeout(function () {
-                    try {
-                        Craft.cp.$primaryForm.data('initialSerializedValue', window.draftEditor.serializeForm(true));
-                    } catch (error) {
-                        console.error(error);
-                    }
-                }, 0);
-                return;
-            }
-            if ($form.data('elementEditor') && $form.data('elementEditor').slideout && !$form.data('matrixMateInitialized')) {
-                $form.data('matrixMateInitialized', true);
-                setTimeout(function () {
-                    try {
-                        $form.data('elementEditor').initialData = $form.data('elementEditor').slideout.$container.serialize();
-                    } catch (error) {
-                        console.error(error);
-                    }
-                }, 0);
-            }
-        },
-
-        // Initialises a Matrix field, including block type groups and tabs
-        initField: function ($field) {
-
-            var $form = $field.closest('form');
-
-            if ($field.hasClass('matrixmate-inited')) {
-                this.maybeOverrideInitialSerializedForm($form);
-                return;
-            }
-
-            $field.addClass('matrixmate-inited');
-
-            var fieldConfig = this._getFieldConfig($field);
-            if (!fieldConfig) {
-                return;
-            }
-
-            // Init group buttons
-            this._initBlockTypeGroups($field, fieldConfig);
-
-            // Hide types that should be, er, hidden
-            this._hideBlockTypes($field, fieldConfig);
-
-            // Init blocks
-            var $blocks = $field.data('matrix').$blockContainer.children();
-            $blocks.each($.proxy(function (index, block) {
-                this.initBlock($(block), $field);
-            }, this));
-
-            this.maybeOverrideInitialSerializedForm($form);
-        },
-
-        // Initialises a Matrix block, including the settings menu and tabs
-        initBlock: function ($block, $field) {
-
-            if ($block.data('matrixmate_inited')) {
-                return;
-            }
-
-            $block.data('matrixmate_inited', true);
-
-            var fieldConfig = this._getFieldConfig($field);
-            if (!fieldConfig) {
-                return;
-            }
-
-            // Init block settings menu
-            this._initBlockSettingsMenu($block, $field, fieldConfig);
-
-            // Init block tabs
-            this._initBlockTabs($block, $field, fieldConfig);
-
-        },
-
-        _hideBlockTypes($field, fieldConfig) {
-
-            if (this.settings.isRevision) {
-                return;
-            }
-
-            var hiddenTypes = fieldConfig.hiddenTypes || [];
-
-            if (!hiddenTypes.length) {
-                return;
-            }
-
-            var $matrixButtons = $field.find('> .buttons').first();
-
-            if (!$matrixButtons.length) {
-                return;
-            }
-
-            var $buttonsToHide = $matrixButtons.find('.btn[data-type]').filter(function () {
-                var type = $(this).data('type');
-                return type && hiddenTypes.indexOf(type) > -1;
-            });
-
-            $buttonsToHide.addClass('hidden');
-
-            // Make sure the first visible type button has the + icons
-            $matrixButtons.find('.btn.add.icon').removeClass('add icon');
-            $matrixButtons.find('.btn[data-type]:visible').first().addClass('add icon');
-
-            // Also hide from the collapsed menu
-            var $menuBtn = $field.find('> .buttons').first().find('.btn.menubtn');
-            var collapsedMenu = $menuBtn.length ? ($menuBtn.data('menubtn') || {}).menu || null : null;
-            var $collapsedMenuContainer = collapsedMenu ? collapsedMenu.$container || null : null;
-            if ($collapsedMenuContainer) {
-                $collapsedMenuContainer.find('a[data-type]').each(function () {
-                    if (hiddenTypes.indexOf($(this).data('type')) > -1) {
-                        $(this).parent('li').addClass('hidden');
-                    }
-                });
-            }
-
-        },
-
-        _initBlockTypeGroups($field, fieldConfig) {
-
-            if (this.settings.isRevision) {
-                return;
-            }
-
-            var groupsConfig = fieldConfig['groups'] || null;
+            const groupsConfig = this.config.groups || null;
             if (!groupsConfig) {
                 return;
             }
 
-            var $origButtons = $field.find('> .buttons').first();
+            const $origButtons = this.$field.find('> .buttons').first();
             $origButtons.addClass('hidden');
 
-            var $matrixmateButtonsContainer = $('<div class="matrixmate-buttons" />').insertAfter($origButtons);
-            var $matrixmateButtons = $('<div class="btngroup" />').appendTo($matrixmateButtonsContainer);
-
-            var $collapsedButtons = $('<div class="btn add icon menubtn hidden">' + Craft.t('app', 'Add a block') + '</div>').appendTo($matrixmateButtonsContainer);
-            var $collapsedMenu = $('<div class="menu matrixmate-collapsed-menu" />').appendTo($matrixmateButtonsContainer);
+            const $matrixmateButtonsContainer = $('<div class="matrixmate-buttons" />').insertAfter($origButtons);
+            const $matrixmateButtons = $('<div class="btngroup" />').appendTo($matrixmateButtonsContainer);
+            const $collapsedButtons = $('<div class="btn add icon menubtn hidden">' + Craft.t('app', 'Add a block') + '</div>').appendTo($matrixmateButtonsContainer);
+            const $collapsedMenu = $('<div class="menu matrixmate-collapsed-menu" />').appendTo($matrixmateButtonsContainer);
 
             // Create button groups
-            var c = 0;
-            var hiddenTypes = fieldConfig.hiddenTypes || [];
-            var usedTypes = [];
-            for (var i = 0; i < groupsConfig.length; i++) {
+            let c = 0;
+            const hiddenTypes = this.config.hiddenTypes || [];
+            const usedTypes = [];
+
+            for (let i = 0; i < groupsConfig.length; i++) {
 
                 // Get group label
-                var label = groupsConfig[i]['label'] || null;
+                const label = groupsConfig[i]['label'] || null;
                 if (!label) {
                     continue;
                 }
 
                 // Get types for this group
-                var types = (groupsConfig[i]['types'] || []).filter(function (typeHandle) {
-                    return hiddenTypes.indexOf(typeHandle) === -1;
-                });
+                const types = (groupsConfig[i]['types'] || []).filter(typeHandle => hiddenTypes.indexOf(typeHandle) === -1);
                 if (!types.length) {
                     continue;
                 }
 
-                var $mainMenuBtn = $('<div class="btn menubtn">' + label + '</div>').appendTo($matrixmateButtons);
-
+                const $mainMenuBtn = $('<div class="btn menubtn">' + label + '</div>').appendTo($matrixmateButtons);
                 $mainMenuBtn.addClass('dashed');
 
-                var $mainMenu = $('<div class="menu matrixmate-menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
-                var $mainUl = $('<ul />').appendTo($mainMenu);
+                const $mainMenu = $('<div class="menu matrixmate-menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
+                const $mainUl = $('<ul />').appendTo($mainMenu);
 
                 if (c > 0) {
                     $('<hr/>').appendTo($collapsedMenu);
                 }
 
                 $('<h6>' + label + '</h6>').appendTo($collapsedMenu);
-                var $collapsedUl = $('<ul/>').appendTo($collapsedMenu);
+                const $collapsedUl = $('<ul/>').appendTo($collapsedMenu);
 
                 // Create the type buttons inside the groups
-                for (var j = 0; j < types.length; ++j) {
+                for (let j = 0; j < types.length; ++j) {
 
-                    var type = types[j];
+                    const type = types[j];
                     usedTypes.push(type);
 
-                    var $origTypeBtn = $origButtons.find('.btn[data-type="' + type + '"]');
+                    const $origTypeBtn = $origButtons.find('.btn[data-type="' + type + '"]');
                     if (!$origTypeBtn.length) {
                         continue;
                     }
 
                     // Check if the type should be disabled
-                    var typeConfig = this._getTypeConfig(type, $field) || {};
-                    var disable = typeConfig && typeConfig.maxLimit && this._countBlockByType(type, $field) >= typeConfig.maxLimit;
+                    const typeConfig = this.getTypeConfig(type) || {};
+                    const disable = typeConfig && typeConfig.maxLimit && this.countBlockByType(type) >= typeConfig.maxLimit;
 
-                    var $li = $('<li/>');
-                    var $a = $('<a/>').attr('data-type', type).text($origTypeBtn.text());
+                    const $li = $('<li/>');
+                    const $a = $('<a/>').attr('data-type', type).text($origTypeBtn.text());
                     if (disable) {
                         $a.addClass('disabled');
                     }
@@ -367,26 +116,26 @@
             }
 
             // Create vanilla buttons for ungrouped types
-            var hideUngrouped = !!fieldConfig.hideUngroupedTypes;
+            const hideUngrouped = !!this.config.hideUngroupedTypes;
             if (!hideUngrouped) {
 
                 // Get ungrouped, original buttons
-                $hiddenUngroupedOrigButtons = $($origButtons.find('.btn[data-type]').filter(function (index, button) {
-                    var type = $(button).data('type');
+                const $hiddenUngroupedOrigButtons = $($origButtons.find('.btn[data-type]').filter(function (index, button) {
+                    const type = $(button).data('type');
                     return type && hiddenTypes.indexOf(type) === -1 && usedTypes.indexOf(type) === -1;
                 }).get().reverse());
 
                 if ($hiddenUngroupedOrigButtons.length) {
-                    var $ul = $('<ul />');
+                    const $ul = $('<ul />');
                     $hiddenUngroupedOrigButtons.each(function (index) {
-                        var $btn = $(this).clone();
+                        const $btn = $(this).clone();
                         if (index === $hiddenUngroupedOrigButtons.length - 1) {
                             $btn.addClass('icon add');
                         }
                         $matrixmateButtons.prepend($btn);
-                        var type = $btn.data('type');
-                        var $li = $('<li/>');
-                        var $a = $('<a/>').attr('data-type', type).text($btn.text());
+                        const type = $btn.data('type');
+                        const $li = $('<li/>');
+                        const $a = $('<a/>').attr('data-type', type).text($btn.text());
                         $li.append($a).prependTo($ul);
                     });
                     $collapsedMenu.prepend('<hr />').prepend($ul);
@@ -404,7 +153,7 @@
             $matrixmateButtons.find('.menubtn').each(function () {
                 new Garnish.MenuBtn($(this), {
                     onOptionSelect: function (option) {
-                        var type = $(option).data('type');
+                        const type = $(option).data('type');
                         $origButtons.find('[data-type="' + type + '"]').trigger('click');
                     }
                 });
@@ -414,30 +163,183 @@
             // Init menu buttons for the collapsed menu
             new Garnish.MenuBtn($collapsedButtons, {
                 onOptionSelect: function (option) {
-                    var type = $(option).data('type');
+                    const type = $(option).data('type');
                     $origButtons.find('[data-type="' + type + '"]').trigger('click');
                 }
             });
 
-            this.addListener($field, 'resize', $.proxy(function () {
-                if (!$field.data('matrixmate-buttons-width')) {
-                    $field.data('matrixmate-buttons-width', $matrixmateButtons.width());
-                    if (!$field.data('matrixmate-buttons-width')) {
+            this.addListener(this.$field, 'resize', () => {
+                if (!this.$field.data('matrixmate-buttons-width')) {
+                    this.$field.data('matrixmate-buttons-width', $matrixmateButtons.width());
+                    if (!this.$field.data('matrixmate-buttons-width')) {
                         return;
                     }
                 }
-                if ($field.width() < $field.data('matrixmate-buttons-width')) {
+                if (this.$field.width() < this.$field.data('matrixmate-buttons-width')) {
                     $collapsedButtons.removeClass('hidden');
                     $matrixmateButtons.addClass('hidden');
                 } else {
                     $collapsedButtons.addClass('hidden');
                     $matrixmateButtons.removeClass('hidden');
                 }
-            }, this));
+            });
 
         },
+        hideBlockTypes() {
+            const hiddenTypes = this.config.hiddenTypes || [];
+            if (!hiddenTypes.length) {
+                return;
+            }
 
-        _initBlockTabs: function ($block, $field, fieldConfig) {
+            const $matrixButtons = this.$field.find('> .buttons').first();
+            if (!$matrixButtons.length) {
+                return;
+            }
+
+            const $buttonsToHide = $matrixButtons.find('.btn[data-type]').filter(function () {
+                const type = $(this).data('type');
+                return type && hiddenTypes.indexOf(type) > -1;
+            });
+
+            $buttonsToHide.addClass('hidden');
+
+            // Make sure the first visible type button has the + icons
+            $matrixButtons.find('.btn.add.icon').removeClass('add icon');
+            $matrixButtons.find('.btn[data-type]:visible').first().addClass('add icon');
+
+            // Also hide from the collapsed menu
+            const $menuBtn = this.$field.find('> .buttons').first().find('.btn.menubtn');
+            const collapsedMenu = $menuBtn.length ? ($menuBtn.data('menubtn') || {}).menu || null : null;
+            const $collapsedMenuContainer = collapsedMenu ? collapsedMenu.$container || null : null;
+            if ($collapsedMenuContainer) {
+                $collapsedMenuContainer.find('a[data-type]').each(function () {
+                    const type = $(this).data('type');
+                    if (hiddenTypes.indexOf(type) > -1) {
+                        $(this).parent('li').addClass('hidden');
+                    }
+                });
+            }
+        },
+        initBlocks() {
+            this.$field.data('matrix').$blockContainer.children().each((index, block) => {
+                this.initBlock($(block));
+            });
+        },
+        initBlock($block) {
+            if ($block.data('matrixmate_inited')) {
+                return;
+            }
+            $block.data('matrixmate_inited', true);
+            this.initBlockSettingsMenu($block);
+            this.initBlockTabs($block);
+        },
+        initBlockSettingsMenu($block, time) {
+
+            if (!time) {
+                time = new Date().getTime();
+            }
+
+            Garnish.requestAnimationFrame(() => {
+
+                const $settingsBtn = $block.find('.actions .settings.menubtn');
+                const menuBtn = $settingsBtn.length ? ($settingsBtn.data('trigger') || $settingsBtn.data('menubtn') || null) : null;
+
+                if (!menuBtn) {
+                    if ((new Date().getTime()) - time < 1000) { // Give it a second
+                        this.initBlockSettingsMenu($block, time);
+                    }
+                    return;
+                }
+
+                const $menu = menuBtn.$container || menuBtn.menu.$container || null;
+                if (!$menu.length) {
+                    return;
+                }
+
+                $menu
+                    .addClass('matrixmate-settings-menu')
+                    .find('a[data-action="add"]')
+                    .parents('li')
+                    .addClass('hidden');
+
+                $menu.find('hr').removeClass('padded');
+
+                const $origUl = $menu.find('a[data-action="add"]').parents('li').parent('ul');
+                const groupsConfig = this.config.groups || null;
+
+                // Create groups
+                const usedTypes = [];
+                if (groupsConfig) {
+                    let c = 0;
+                    for (let i = 0; i < groupsConfig.length; i++) {
+
+                        const label = groupsConfig[i]['label'] || null;
+                        if (!label) {
+                            continue;
+                        }
+
+                        const $newUl = $('<ul class="padded" data-matrixmate-group="' + label + '" />');
+                        if (c > 0) {
+                            $('<hr/>').insertBefore($origUl);
+                        }
+
+                        $('<h6>' + label + '</h6>').insertBefore($origUl);
+                        $newUl.insertBefore($origUl);
+
+                        // Create type buttons
+                        const types = groupsConfig[i]['types'] || [];
+                        for (let j = 0; j < types.length; ++j) {
+                            const type = types[j];
+                            usedTypes.push(type);
+                            let $li = $menu.find('a[data-type="' + type + '"]').parents('li').first();
+                            if (!$li.length) {
+                                continue;
+                            }
+                            $li = $li.clone().removeClass('hidden');
+                            $newUl.append($li);
+                        }
+
+                        c++;
+
+                    }
+                }
+
+                // Un-hide un-grouped types that aren't explicitly hidden :P
+                const hiddenTypes = this.config.hiddenTypes || [];
+                const hasGroupConfig = !!(this.config['groups'] || null);
+                const hideUngrouped = !!(this.config.hideUngroupedTypes || null);
+                const lis = [];
+                $menu.find('li.hidden a[data-action="add"]').each(function () {
+                    const $a = $(this);
+                    const type = $a.data('type');
+                    if (usedTypes.indexOf(type) === -1 && (!hideUngrouped || !hasGroupConfig) && hiddenTypes.indexOf(type) === -1) {
+                        lis.push($a.parent('li').clone().removeClass('hidden'));
+                    }
+                });
+                if (lis.length) {
+                    const $ul = $('<ul data-matrixmate-group class="padded"/>');
+                    $ul.append(lis);
+                    const $customHeading = $menu.find('h6').first();
+                    if ($customHeading.length) {
+                        $customHeading.before($ul);
+                        $ul.after('<hr />');
+                    } else {
+                        $menu.append($ul);
+                    }
+                }
+
+                $menu.on('click', '[data-matrixmate-group] a[data-action="add"]', function () {
+                    const type = $(this).data('type');
+                    if (!type) {
+                        return;
+                    }
+                    $menu.find('ul:not([data-matrixmate-group]) a[data-action="add"][data-type="' + type + '"]').trigger('click');
+                });
+
+            });
+
+        },
+        initBlockTabs($block) {
 
             if ($block.hasClass('matrixmate-block-inited')) {
                 return;
@@ -445,22 +347,18 @@
 
             $block.addClass('matrixmate-block-inited');
 
-            if (this.settings.isRevision) {
-                $block.addClass('disabled');
-            }
-
-            var type = $block.data('type');
-            var typeConfig = this._getTypeConfig(type, $field);
+            const type = $block.data('type');
+            const typeConfig = this.getTypeConfig(type);
 
             if (!typeConfig) {
                 return;
             }
 
-            var tabs = [].concat(typeConfig.tabs || []);
-            var numTabs = tabs.length;
+            const tabs = [].concat(typeConfig.tabs || []);
+            const numTabs = tabs.length;
 
             // If we have any hidden fields, we'll stick them in a hidden tab
-            var hiddenFields = typeConfig['hiddenFields'] || [];
+            const hiddenFields = typeConfig['hiddenFields'] || [];
             if (hiddenFields.length) {
                 tabs.unshift({
                     fields: hiddenFields,
@@ -472,10 +370,10 @@
                 return;
             }
 
-            var renderDefaultTab = !!(typeConfig['defaultTabName'] || null) || (!numTabs && hiddenFields.length);
+            const renderDefaultTab = !!(typeConfig['defaultTabName'] || null) || (!numTabs && hiddenFields.length);
 
-            var defaultTabOptions = {
-                label: typeConfig['defaultTabName'] || Craft.t('Fields'),
+            const defaultTabOptions = {
+                label: typeConfig['defaultTabName'] || Craft.t('site', 'Fields'),
                 isDefaultTab: true,
                 render: renderDefaultTab
             };
@@ -486,41 +384,36 @@
                 tabs.push(defaultTabOptions);
             }
 
-            var namespace = $field.prop('id') + '-' + $block.data('id');
-
-            var matrixmateNamespace = 'matrixmate-' + namespace;
-
-            var $tabs = $('<ul class="matrixmate-tabs"/>').appendTo($block);
-
-            var $fields = $block.find('> .fields > .flex-fields');
+            const namespace = this.$field.prop('id') + '-' + $block.data('id');
+            const matrixmateNamespace = 'matrixmate-' + namespace;
+            const $tabs = $('<ul class="matrixmate-tabs"/>').appendTo($block);
+            const $fields = $block.find('> .fields > .flex-fields');
 
             $fields.addClass('matrixmate-fields').removeClass('flex-fields');
 
             // Create tabs
-            var usedFields = [];
-            var tabIndex = 0;
-            var hasRenderedSelectedTab = false;
+            const usedFields = [];
+            let tabIndex = 0;
+            let hasRenderedSelectedTab = false;
 
-            var blockColor = $block.css('backgroundColor');
+            const blockColor = $block.css('backgroundColor');
 
             // Get list of config tab fields
-            var tabFields = tabs.reduce(function (fields, group) {
+            const tabFields = tabs.reduce(function (fields, group) {
                 return group['fields'] ? fields.concat(group['fields']) : fields;
             }, []);
 
-            for (var i = 0; i < tabs.length; i++) {
+            for (let i = 0; i < tabs.length; i++) {
 
-                var navClasses = '';
-                var paneClasses = '';
+                let navClasses = '';
+                let paneClasses = '';
 
-                var $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" class="flex-fields" />');
+                const $pane = $('<div id="' + matrixmateNamespace + '-pane-' + i + '" class="flex-fields" />');
+                const tabFieldHandles = tabs[i]['fields'] || [];
 
-                var tabFieldHandles = tabs[i]['fields'] || [];
-
-                $fields.find('> .field').each($.proxy(function (index, field) {
-                    var $field = $(field);
-                    var handle = this._getBlockFieldHandle($field);
-
+                $fields.find('> .field').each((index, field) => {
+                    const $field = $(field);
+                    const handle = this.getBlockFieldHandle($field);
                     if (!handle || usedFields.indexOf(handle) > -1) {
                         return;
                     }
@@ -532,7 +425,7 @@
                     }
                     usedFields.push(handle);
                     $pane.append($field.attr('data-matrixmate-field', true));
-                }, this));
+                });
 
                 if (!$pane.find('[data-matrixmate-field]').length) {
                     continue;
@@ -548,8 +441,8 @@
                 $pane.addClass(paneClasses).appendTo($fields);
 
                 if (tabs[i]['render'] !== false) {
-                    var $tabLi = $('<li/>').appendTo($tabs);
-                    var $tabA = $('<a id="' + matrixmateNamespace + '-' + i + '" class="tab' + navClasses + '">' + tabs[i].label + '</a>')
+                    const $tabLi = $('<li/>').appendTo($tabs);
+                    const $tabA = $('<a id="' + matrixmateNamespace + '-' + i + '" class="tab' + navClasses + '">' + tabs[i].label + '</a>')
                         .appendTo($tabLi)
                         .data('matrixmate-tabtarget', '#' + matrixmateNamespace + '-pane-' + i);
                 }
@@ -576,185 +469,25 @@
             this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
 
         },
+        maybeDisableBlockTypes() {
+            const types = Object.keys(this.config.types || {});
+            for (let i = 0; i < types.length; ++i) {
+                this.maybeDisableBlockType(types[i]);
+            }
+        },
+        maybeDisableBlockType(type) {
+            const typeConfig = this.getTypeConfig(type) || {};
+            const maxLimit = typeConfig.maxLimit || null;
 
-        _initBlockSettingsMenu: function ($block, $field, fieldConfig, time) {
-
-            if (this.settings.isRevision) {
+            if (!maxLimit) {
                 return;
             }
 
-            if (!time) {
-                time = new Date().getTime();
-            }
-
-            Garnish.requestAnimationFrame($.proxy(function () {
-
-                var $settingsBtn = $block.find('.actions .settings.menubtn');
-                var menuBtn = $settingsBtn.length ? ($settingsBtn.data('trigger') || $settingsBtn.data('menubtn') || null) : null;
-
-                if (!menuBtn) {
-                    if ((new Date().getTime()) - time < 1000) { // Give it a second
-                        this._initBlockSettingsMenu($block, $field, fieldConfig, time);
-                    }
-                    return;
-                }
-
-                var $menu = menuBtn.$container || menuBtn.menu.$container || null;
-                if (!$menu) {
-                    return;
-                }
-
-                $menu
-                    .addClass('matrixmate-settings-menu')
-                    .find('a[data-action="add"]')
-                    .parents('li')
-                    .addClass('hidden');
-
-                $menu.find('hr').removeClass('padded');
-
-                var $origUl = $menu.find('a[data-action="add"]').parents('li').parent('ul');
-
-                var groupsConfig = fieldConfig['groups'] || null;
-
-                // Create groups
-                var usedTypes = [];
-                if (groupsConfig) {
-                    var c = 0;
-                    for (var i = 0; i < groupsConfig.length; i++) {
-
-                        var label = groupsConfig[i]['label'] || null;
-                        if (!label) {
-                            continue;
-                        }
-
-                        var $newUl = $('<ul class="padded" data-matrixmate-group="' + label + '" />');
-                        if (c > 0) {
-                            $('<hr/>').insertBefore($origUl);
-                        }
-
-                        $('<h6>' + label + '</h6>').insertBefore($origUl);
-                        $newUl.insertBefore($origUl);
-
-                        // Create type buttons
-                        var types = groupsConfig[i]['types'] || [];
-                        var type;
-                        for (var j = 0; j < types.length; ++j) {
-                            type = types[j];
-                            usedTypes.push(type);
-                            var $li = $menu.find('a[data-type="' + type + '"]').parents('li').first();
-                            if (!$li.length) {
-                                continue;
-                            }
-                            $li = $li.clone().removeClass('hidden');
-                            $newUl.append($li);
-                        }
-
-                        c++;
-
-                    }
-                }
-
-                // Un-hide un-grouped types that aren't explicitly hidden :P
-                var hiddenTypes = fieldConfig.hiddenTypes || [];
-                var hasGroupConfig = !!(fieldConfig['groups'] || null);
-                var hideUngrouped = (!!fieldConfig.hideUngroupedTypes);
-                var $a;
-                var type;
-                var lis = [];
-                $menu.find('li.hidden a[data-action="add"]').each(function () {
-                    $a = $(this);
-                    type = $a.data('type');
-                    if (usedTypes.indexOf(type) === -1 && (!hideUngrouped || !hasGroupConfig) && hiddenTypes.indexOf(type) === -1) {
-                        lis.push($a.parent('li').clone().removeClass('hidden'));
-                    }
-                });
-                if (lis.length) {
-                    var $ul = $('<ul data-matrixmate-group class="padded"/>');
-                    $ul.append(lis);
-                    var $customHeading = $menu.find('h6').first();
-                    if ($customHeading.length) {
-                        $customHeading.before($ul);
-                        $ul.after('<hr />');
-                    } else {
-                        $menu.append($ul);
-                    }
-                }
-
-                $menu.on('click', '[data-matrixmate-group] a[data-action="add"]', function () {
-                    var type = $(this).data('type');
-                    if (!type) {
-                        return;
-                    }
-                    $menu.find('ul:not([data-matrixmate-group]) a[data-action="add"][data-type="' + type + '"]').trigger('click');
-                });
-
-            }, this));
-
-        },
-
-        _getFieldHandle: function ($field) {
-            return $field.attr('id').split('-').pop();
-        },
-
-        _getBlockFieldHandle: function ($field) {
-            return $field.attr('id').split('-').reverse()[1] || null;
-        },
-
-        _getFieldConfig: function ($field) {
-            var config = $field.data('matrixmateconfig');
-            if (config !== undefined) {
-                return config;
-            }
-            var handle = this._getFieldHandle($field);
-            if (!handle) {
-                return null;
-            }
-            var fieldConfig = this.settings.fieldsConfig[handle] || null;
-            if (!fieldConfig) {
-                return null;
-            }
-            config = (fieldConfig[this.settings.context] || fieldConfig['*'] || {})['config'] || null;
-            $field.data('matrixmateconfig', config);
-            return config;
-        },
-
-        _getTypeConfig: function (type, $field) {
-            var fieldConfig = this._getFieldConfig($field);
-            if (!fieldConfig || !(fieldConfig['types'] || null)) {
-                return null;
-            }
-            return fieldConfig.types[type] || null;
-        },
-
-        _countBlockByType: function (type, $field) {
-            return $field.find('.matrixblock[data-type="' + type + '"]').length;
-        },
-
-        _maybeDisableBlockTypes($field) {
-            var fieldConfig = this._getFieldConfig($field);
-            if (!fieldConfig) {
-                return;
-            }
-            var types = Object.keys(fieldConfig.types || {});
-            for (var i = 0; i < types.length; ++i) {
-                this._maybeDisableBlockType(types[i], $field);
-            }
-        },
-
-        _maybeDisableBlockType(type, $field) {
-
-            var typeConfig = this._getTypeConfig(type, $field) || {};
-            var maxLimit = typeConfig.maxLimit || null;
-
-            if (maxLimit === null) {
-                return;
-            }
-
-            var currentCount = this._countBlockByType(type, $field);
-            var disable = currentCount >= maxLimit;
+            const currentCount = this.countBlockByType(type);
+            const disable = currentCount >= maxLimit;
 
             // Update Add buttons
-            $field.find('> .buttons .btn[data-type="' + type + '"], > .matrixmate-buttons .btn[data-type="' + type + '"]').each(function () {
+            this.$field.find('> .buttons .btn[data-type="' + type + '"], > .matrixmate-buttons .btn[data-type="' + type + '"]').each(function () {
                 if (disable) {
                     $(this).addClass('disabled');
                 } else {
@@ -763,14 +496,12 @@
             });
 
             // Update Add buttons in Garnish menus
-            var menuBtn;
-            var $container;
-            $field.find('> .buttons .btn.add.menubtn, > .matrixmate-buttons .btn.menubtn, .matrixblock .settings.menubtn').each(function () {
-                menuBtn = $(this).data('trigger') || $(this).data('menubtn');
+            this.$field.find('> .buttons .btn.add.menubtn, > .matrixmate-buttons .btn.menubtn, .matrixblock .settings.menubtn').each(function () {
+                const menuBtn = $(this).data('trigger') || $(this).data('menubtn');
                 if (!menuBtn) {
                     return;
                 }
-                $container = menuBtn.$container || menuBtn.menu.$container || null;
+                const $container = menuBtn.$container || menuBtn.menu.$container || null;
                 if (!$container) {
                     return;
                 }
@@ -783,49 +514,108 @@
                 });
             });
         },
-
-        onBlockTabClick: function (e) {
-
+        getTypeConfig(type) {
+            return (this.config.types || {})[type] || null;
+        },
+        countBlockByType(type) {
+            return this.$field.find('.matrixblock[data-type="' + type + '"]').length;
+        },
+        getBlockFieldHandle: $blockField => $blockField.attr('id').split('-').reverse()[1] || null,
+        onBlockTabClick: e => {
             e.preventDefault();
             e.stopPropagation();
-
-            var $tab = $(e.target);
-            var $tabsContainer = $tab.parent().parent('.matrixmate-tabs');
-            var targetSelector = $tab.data('matrixmate-tabtarget');
-
+            const $tab = $(e.target);
+            const $tabsContainer = $tab.parent().parent('.matrixmate-tabs');
+            const targetSelector = $tab.data('matrixmate-tabtarget');
             if (!$tabsContainer.length || !targetSelector) {
                 return;
             }
-
-            var $target = $(targetSelector);
+            const $target = $(targetSelector);
             if (!$target.length) {
                 return;
             }
-
             $tabsContainer.find('a.sel').removeClass('sel');
             $tab.addClass('sel');
-
             $target.siblings('div').addClass('hidden');
             $target.removeClass('hidden');
-
-        },
-
-        onMatrixInputInit: function (e) {
-            Garnish.requestAnimationFrame($.proxy(function () {
-                this.initField(e.target.$container);
-            }, this));
-        },
-
-        onMatrixInputBlockAdded: function (e) {
-            this.initBlock(e.$block, e.target.$container);
         }
+    });
 
-    }, {
-        defaults: {
-            context: false,
-            fieldsConfig: {},
-            isRevision: false
+    Craft.MatrixMate = {
+        fieldConfig: null,
+        elementContexts: {},
+        initPrimaryForm(elementId, context) {
+            if (Craft.cp.$primaryForm && Craft.cp.$primaryForm.length) {
+                Craft.cp.$primaryForm.data('matrixMateContext', context);
+            }
+            this.elementContexts[`${elementId}`] = context;
+        },
+        getContextForElement(elementId) {
+            return this.elementContexts[`${elementId}`] || '*';
+        },
+        getConfigForField($field, context) {
+            if (!context) {
+                return null;
+            }
+            const handle = $field.attr('id').split('-').pop();
+            const fieldConfig = this.fieldConfig[handle] || null;
+            if (!fieldConfig) {
+                return null;
+            }
+            return fieldConfig[context] || fieldConfig['*'] || null;
         }
+    };
+
+    const elementEditorInitFn = Craft.ElementEditor.prototype.init;
+    Craft.ElementEditor.prototype.init = function () {
+        elementEditorInitFn.apply(this, arguments);
+        this.$container.data('matrixMateContext', Craft.MatrixMate.getContextForElement(this.settings.draftId || this.settings.canonicalId));
+    };
+
+    // Override the native MatrixInput::updateAddBlockBtn method
+    var updateAddBlockBtnFn = Craft.MatrixInput.prototype.updateAddBlockBtn;
+    Craft.MatrixInput.prototype.updateAddBlockBtn = function () {
+        updateAddBlockBtnFn.apply(this, arguments);
+        const matrixMate = this.$container.data(MATRIX_MATE_KEY);
+        if (matrixMate) {
+            Garnish.requestAnimationFrame(() => {
+                matrixMate.maybeDisableBlockTypes();
+            });
+        }
+    }
+
+    Garnish.on(Craft.MatrixInput, 'afterInit', e => {
+        setTimeout(() => {
+            const $field = e.target.$container;
+            if (!$field.data(MATRIX_MATE_KEY)) {
+                new Craft.MatrixMateField(e.target.$container);
+            }
+        }, 0);
+    });
+
+    Garnish.on(Craft.MatrixInput, 'blockAdded', e => {
+        const $block = e.$block;
+        const $field = $block.closest('.matrix-field');
+        if (!$field.length) {
+            return;
+        }
+        const matrixMate = $field.data(MATRIX_MATE_KEY);
+        if (matrixMate) {
+            matrixMate.initBlock($block);
+        }
+    });
+
+    // Update forms' entry type context if the entry type changes
+    $('body').on('change', 'select[id$="entryType"]', e => {
+        const typeId = parseInt($(e.target).val(), 10);
+        if (!typeId) {
+            return;
+        }
+        const $form = $(e.target).closest('form');
+        if (!$form.length) {
+            return;
+        }
+        $form.data('matrixMateContext', `entryType:${typeId}`);
     });
 
 })(jQuery);

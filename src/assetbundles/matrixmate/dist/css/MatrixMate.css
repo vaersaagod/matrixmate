@@ -48,7 +48,7 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
 }
 
 .matrix-field:not(.matrixmate-inited) > .buttons,
-.matrix-field:not(.matrixmate-inited) > .blocks > .matrixblock > .fields {
+.matrix-field:not(.matrixmate-inited) > .blocks > .matrixblock:not(.static) > .fields {
     visibility: hidden !important;
 }
 .field .field .matrix-field > .buttons,
@@ -153,4 +153,18 @@ html.noscroll .matrixmate-settings-menu {
 .matrixmate-menu {
     overflow: hidden;
     max-height: none !important;
+}
+
+h6 + [data-matrixmate-group] {
+    margin-top: 3px;
+}
+
+[data-matrixmate-group] a:not(.disabled),
+.matrixmate-menu a:not(.disabled) {
+    cursor: pointer;
+}
+
+[data-matrixmate-group] a.disabled,
+.matrixmate-menu a.disabled {
+    pointer-events: none;
 }
