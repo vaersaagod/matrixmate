@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 2.0.0-beta.1  
+## 2.0.0-beta.2 - 2022-05-03
+### Fixed
+- Fixes a JavaScript error that would occur if blocks with tabs had validation errors  
+### Improved
+- MatrixMate now auto-activates the first block tab with validation errors  
+### Changed
+- MatrixMate now requires Craft 4.0.0-RC2 or newer  
+
+## 2.0.0-beta.1 - 2022-04-23  
 ### Added  
 - Adds Craft 4.0 compatibility  
 - Adds support for using associative arrays in tabs config  

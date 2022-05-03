@@ -24,11 +24,14 @@
 
     Craft.MatrixMateField = Garnish.Base.extend({
         init($field) {
+            if ($field.data(MATRIX_MATE_KEY)) {
+                return;
+            }
             this.$field = $field;
+            this.$field.addClass('matrixmate-inited');
             this.matrix = this.$field.data('matrix');
             this.$form = this.matrix.$form;
             this.config = Craft.MatrixMate.getConfigForField(this.$field, this.$form.data('matrixMateContext'));
-            this.$field.addClass('matrixmate-inited');
             if (!this.config) {
                 return;
             }
@@ -445,11 +448,10 @@
                     const $tabA = $('<a id="' + matrixmateNamespace + '-' + i + '" class="tab' + navClasses + '">' + tabs[i].label + '</a>')
                         .appendTo($tabLi)
                         .data('matrixmate-tabtarget', '#' + matrixmateNamespace + '-pane-' + i);
-                }
-
-                if ($pane.find('.field.has-errors').length > 0) {
-                    $tabA.addClass('error');
-                    $tabA.append(' <span data-icon="alert" />');
+                    if ($pane.find('.field.has-errors').length > 0) {
+                        $tabA.addClass('error');
+                        $tabA.append(' <span data-icon="alert" />');
+                    }
                 }
 
                 tabIndex++;
@@ -467,6 +469,12 @@
             $block.addClass('matrixmate-has-tabs');
 
             this.addListener($tabs.find('a'), 'click', 'onBlockTabClick');
+
+            // If there are tabs with errors, set the first one to active
+            const $firstTabWithError = $block.find('a.tab.error').eq(0);
+            if ($firstTabWithError.length) {
+                this.setBlockTabToActive($firstTabWithError);
+            }
 
         },
         maybeDisableBlockTypes() {
@@ -521,10 +529,7 @@
             return this.$field.find('.matrixblock[data-type="' + type + '"]').length;
         },
         getBlockFieldHandle: $blockField => $blockField.attr('id').split('-').reverse()[1] || null,
-        onBlockTabClick: e => {
-            e.preventDefault();
-            e.stopPropagation();
-            const $tab = $(e.target);
+        setBlockTabToActive($tab) {
             const $tabsContainer = $tab.parent().parent('.matrixmate-tabs');
             const targetSelector = $tab.data('matrixmate-tabtarget');
             if (!$tabsContainer.length || !targetSelector) {
@@ -538,6 +543,11 @@
             $tab.addClass('sel');
             $target.siblings('div').addClass('hidden');
             $target.removeClass('hidden');
+        },
+        onBlockTabClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.setBlockTabToActive($(e.target));
         }
     });
 
