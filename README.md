@@ -1,4 +1,4 @@
-# MatrixMate plugin for Craft CMS 4.x
+# MatrixMate plugin for Craft CMS
 
 Welding Matrix into shape, mate!  
 
@@ -6,7 +6,7 @@ Welding Matrix into shape, mate!
 
 ## Requirements
 
-This plugin requires Craft CMS 3.7.0 or later.
+This plugin requires Craft CMS 4.0.0 or later.  
 
 ## Installation
 
