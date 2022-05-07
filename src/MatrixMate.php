@@ -24,13 +24,14 @@ use craft\events\PopulateElementEvent;
 use craft\events\TemplateEvent;
 use craft\helpers\Json;
 use craft\services\Fields;
-use craft\services\Plugins;
+use craft\web\Application;
 use craft\web\Controller;
 
 use craft\web\CpScreenResponseFormatter;
 use craft\web\Request;
 use craft\web\Response;
 use craft\web\View;
+
 use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
@@ -89,10 +90,10 @@ class MatrixMate extends Plugin
         // Defer further initialisation to after plugins have loaded, and only for CP web requests
         if (Craft::$app->getRequest()->getIsCpRequest() && !Craft::$app->getRequest()->getIsConsoleRequest()) {
             Event::on(
-                Plugins::class,
-                Plugins::EVENT_AFTER_LOAD_PLUGINS,
+                Application::class,
+                Application::EVENT_INIT,
                 function (): void {
-                    $this->onAfterLoadPlugins();
+                    $this->onAppInit();
                 }
             );
         }
@@ -106,7 +107,32 @@ class MatrixMate extends Plugin
         );
     }
 
-    public function onAfterLoadPlugins(): void
+    /**
+     * @return Settings
+     */
+    public function getSettings(): Settings
+    {
+        if ($this->_settings === null) {
+            $this->_settings = $this->createSettingsModel();
+        }
+        return $this->_settings;
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @return Settings
+     */
+    protected function createSettingsModel(): Settings
+    {
+        return new Settings();
+    }
+
+    /**
+     * @return void
+     */
+    protected function onAppInit(): void
     {
 
         if (!Craft::$app->getUser()->checkPermission('accessCp')) {
@@ -138,28 +164,6 @@ class MatrixMate extends Plugin
             $this->registerAssetBundleForElement($element);
         });
 
-    }
-
-    /**
-     * @return Settings
-     */
-    public function getSettings(): Settings
-    {
-        if ($this->_settings === null) {
-            $this->_settings = $this->createSettingsModel();
-        }
-        return $this->_settings;
-    }
-
-    // Protected Methods
-    // =========================================================================
-
-    /**
-     * @return Settings
-     */
-    protected function createSettingsModel(): Settings
-    {
-        return new Settings();
     }
 
     /**

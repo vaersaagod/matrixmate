@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c85b14fde36eb40bac7e5b08ba6940bb",
+    "content-hash": "95cda134bd0f4ce8b911c16145634cbe",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -678,16 +678,16 @@
         },
         {
             "name": "craftcms/cms",
-            "version": "4.0.0.1",
+            "version": "4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/craftcms/cms.git",
-                "reference": "e3456380bdf7b18a5bb4c47c2e61e62805960915"
+                "reference": "d4f2f5f311eb3829300f0aaccb193ffcca03eaef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/craftcms/cms/zipball/e3456380bdf7b18a5bb4c47c2e61e62805960915",
-                "reference": "e3456380bdf7b18a5bb4c47c2e61e62805960915",
+                "url": "https://api.github.com/repos/craftcms/cms/zipball/d4f2f5f311eb3829300f0aaccb193ffcca03eaef",
+                "reference": "d4f2f5f311eb3829300f0aaccb193ffcca03eaef",
                 "shasum": ""
             },
             "require": {
@@ -792,7 +792,7 @@
                 "rss": "https://github.com/craftcms/cms/releases.atom",
                 "source": "https://github.com/craftcms/cms"
             },
-            "time": "2022-05-04T17:36:16+00:00"
+            "time": "2022-05-06T08:12:52+00:00"
         },
         {
             "name": "craftcms/oauth2-craftid",
@@ -6784,16 +6784,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.6.5",
+            "version": "1.6.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "462f7651f3454f280d6a397be3290634ab937022"
+                "reference": "d41c39cb2e487663bce9bbd97c660e244b73abad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/462f7651f3454f280d6a397be3290634ab937022",
-                "reference": "462f7651f3454f280d6a397be3290634ab937022",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d41c39cb2e487663bce9bbd97c660e244b73abad",
+                "reference": "d41c39cb2e487663bce9bbd97c660e244b73abad",
                 "shasum": ""
             },
             "require": {
@@ -6819,7 +6819,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.6.5"
+                "source": "https://github.com/phpstan/phpstan/tree/1.6.7"
             },
             "funding": [
                 {
@@ -6839,7 +6839,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-05-04T10:49:26+00:00"
+            "time": "2022-05-04T22:55:41+00:00"
         },
         {
             "name": "rector/rector",
@@ -6847,12 +6847,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "ebc3a0684d5907ff88da1f752d6149722bacbb3d"
+                "reference": "ae706b62054df7d37909e7d7cec4744db68015b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/ebc3a0684d5907ff88da1f752d6149722bacbb3d",
-                "reference": "ebc3a0684d5907ff88da1f752d6149722bacbb3d",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/ae706b62054df7d37909e7d7cec4744db68015b6",
+                "reference": "ae706b62054df7d37909e7d7cec4744db68015b6",
                 "shasum": ""
             },
             "require": {
@@ -6900,7 +6900,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-05-04T15:20:50+00:00"
+            "time": "2022-05-07T13:44:50+00:00"
         },
         {
             "name": "sebastian/diff",
