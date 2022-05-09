@@ -27,6 +27,7 @@ use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
 
+use yii\base\Action;
 use yii\base\ActionEvent;
 use yii\base\Event;
 
@@ -125,7 +126,7 @@ class MatrixMate extends Plugin
             \yii\base\Controller::EVENT_BEFORE_ACTION,
             function (ActionEvent $event) {
                 $action = $event->action;
-                if ($action->id !== 'get-editor-html') {
+                if (!$action instanceof Action || $action->id !== 'get-editor-html') {
                     return;
                 }
                 $request = $action->controller->request;

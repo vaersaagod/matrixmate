@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.3 - 2022-05-09
+### Fixed  
+- Fixes an issue where MatrixMate could conflict with the Workflow plugin
+
 ## 1.4.2 - 2022-04-23
 ### Improved
 - It's now possible to use associative arrays for tabs config. Thanks @timrosskamp
