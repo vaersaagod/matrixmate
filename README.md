@@ -134,6 +134,35 @@ Additionally, a "global" config that will apply everywhere else is added using t
 `volume:{handle}` - Apply for assets in a particular volume  
 `users` - Apply for user account edit pages  
 
+#### Config context inheritance
+
+‼️ MatrixMate config contexts are **not** recursively merged – unlike, for example, Craft's multi-environment configs. This means that if you have a global config context (i.e. `*`) and a context targeting, for example, a specific section (e.g. `'section:news'`), the settings for the global config are **not** inherited by that `'section:news'` context. Essentially, you start fresh for every context. This is not a bug, but a feature!  
+
+...in cases where you'd prefer that config contexts were merged, you can work around this behavior by adding a bit of PHP logic to the config file:  
+
+```php
+<?php
+
+$globalConfig = [
+    'groups' => [
+        ...
+    ],
+];
+
+return [
+    'fields' => [
+        'matrixFieldHandle' => [ 
+            '*' => $globalConfig,
+            'section:news,section:blog' => array_merge_recursive($globalConfig, [
+                'groups' => [
+                    ...
+                ],
+            ]),
+        ],
+    ],
+];
+```
+
 ### Configuration settings
 
 The below settings apply to a Matrix field configuration, e.g.  
