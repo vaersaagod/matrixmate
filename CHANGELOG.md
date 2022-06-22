@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.2 - 2022-06-22
+### Fixed
+- Fixes an issue where adding a block via existing blocks' disclosure menu could put a hash symbol in the browser's address bar, potentially causing various issues.  
+
 ## 2.0.1 - 2022-05-07
 ### Changed
 - MatrixMate now defers any element queries to the `craft\web\Application::EVENT_INIT` event, avoiding potential issues with element queries being executed before Craft has fully initialised.

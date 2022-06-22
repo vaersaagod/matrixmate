@@ -331,7 +331,8 @@
                     }
                 }
 
-                $menu.on('click', '[data-matrixmate-group] a[data-action="add"]', function () {
+                $menu.on('click', '[data-matrixmate-group] a[data-action="add"]', function (e) {
+                    e.preventDefault();
                     const type = $(this).data('type');
                     if (!type) {
                         return;
