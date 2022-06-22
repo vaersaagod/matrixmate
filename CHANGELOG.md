@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.4 - 2022-06-22
+### Fixed
+- Fixes an issue where adding a block via existing blocks' disclosure menu could put a hash symbol in the browser's address bar, potentially causing various issues.   
+
 ## 1.4.3 - 2022-05-09
 ### Fixed  
 - Fixes an issue where MatrixMate could conflict with the Workflow plugin
