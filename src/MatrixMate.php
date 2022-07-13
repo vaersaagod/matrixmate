@@ -20,7 +20,7 @@ use craft\elements\GlobalSet;
 use craft\elements\User;
 use craft\helpers\Json;
 use craft\services\Fields;
-use craft\services\Plugins;
+use craft\web\Application;
 use craft\web\Controller;
 
 use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
@@ -79,9 +79,9 @@ class MatrixMate extends Plugin
         // Defer further initialisation to after plugins have loaded, and only for CP web requests
         if (Craft::$app->getRequest()->getIsCpRequest() && !Craft::$app->getRequest()->getIsConsoleRequest()) {
             Event::on(
-                Plugins::class,
-                Plugins::EVENT_AFTER_LOAD_PLUGINS,
-                [$this, 'onAfterLoadPlugins']
+                Application::class,
+                Application::EVENT_INIT,
+                [$this, 'onAppInit']
             );
         }
 
@@ -98,7 +98,7 @@ class MatrixMate extends Plugin
     /**
      * @return void
      */
-    public function onAfterLoadPlugins(): void
+    public function onAppInit(): void
     {
 
         if (!Craft::$app->getUser()->checkPermission('accessCp')) {
