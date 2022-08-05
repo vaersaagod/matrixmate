@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.0 - 2022-08-05
+### Added
+- Added the `ungroupedTypesPosition` field config setting, which can be used to specify the display order for ungrouped block types  
+
 ## 2.0.2 - 2022-06-22
 ### Fixed
 - Fixes an issue where adding a block via existing blocks' disclosure menu could put a hash symbol in the browser's address bar, potentially causing various issues.  

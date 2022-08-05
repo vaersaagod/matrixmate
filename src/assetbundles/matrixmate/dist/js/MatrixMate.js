@@ -123,19 +123,30 @@
             if (!hideUngrouped) {
 
                 // Get ungrouped, original buttons
-                const $hiddenUngroupedOrigButtons = $($origButtons.find('.btn[data-type]').filter(function (index, button) {
+                let $hiddenUngroupedOrigButtons = $($origButtons.find('.btn[data-type]').filter(function (index, button) {
                     const type = $(button).data('type');
                     return type && hiddenTypes.indexOf(type) === -1 && usedTypes.indexOf(type) === -1;
                 }).get().reverse());
 
                 if ($hiddenUngroupedOrigButtons.length) {
+                    const ungroupedTypesPosition = this.config.ungroupedTypesPosition || 'before';
                     const $ul = $('<ul />');
+                    if (ungroupedTypesPosition === 'after') {
+                        $hiddenUngroupedOrigButtons = $($hiddenUngroupedOrigButtons.get().reverse());
+                    }
                     $hiddenUngroupedOrigButtons.each(function (index) {
                         const $btn = $(this).clone();
-                        if (index === $hiddenUngroupedOrigButtons.length - 1) {
-                            $btn.addClass('icon add');
+                        if (ungroupedTypesPosition === 'after') {
+                            if (!index) {
+                                $btn.addClass('icon add');
+                            }
+                            $matrixmateButtons.append($btn);
+                        } else {
+                            if (index === $hiddenUngroupedOrigButtons.length - 1) {
+                                $btn.addClass('icon add');
+                            }
+                            $matrixmateButtons.prepend($btn);
                         }
-                        $matrixmateButtons.prepend($btn);
                         const type = $btn.data('type');
                         const $li = $('<li/>');
                         const $a = $('<a/>').attr('data-type', type).text($btn.text());

@@ -105,6 +105,11 @@ class MatrixMateService extends Component
                 // Hide ungrouped types?
                 $contextSettings['hideUngroupedTypes'] = (bool) ($contextSettings['hideUngroupedTypes'] ?? false);
 
+                // Ungrouped types position
+                if (!isset($contextSettings['ungroupedTypesPosition']) || !in_array($contextSettings['ungroupedTypesPosition'], ['before', 'after'])) {
+                    $contextSettings['ungroupedTypesPosition'] = 'before';
+                }
+
                 // Explicitly hidden types
                 $hiddenTypes = $contextSettings['hiddenTypes'] ?? null;
                 if (\is_string($hiddenTypes)) {
