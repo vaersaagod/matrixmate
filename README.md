@@ -369,6 +369,21 @@ To explicitly hide one or several block types, add an array of block type handle
 
 This setting will hide any and all block types added to it, regardless of whether those types have been added to any groups or not, and regardless of the value for the `hideUngroupedTypes` setting.
 
+#### ungroupedTypesPosition [string]  
+*Default: `'before'`*  
+
+If set to `'after'`, buttons for ungrouped block types will render _after_ the group buttons.   
+
+```php
+...
+'matrixFieldHandle' => [
+    'groups' => [...],
+    'ungroupedTypesPosition' => 'after',
+],
+```
+
+This setting only applies when using the grouping feature.  
+
 ### Advanced configuration
 
 *Danger Zone*  

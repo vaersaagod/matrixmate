@@ -377,13 +377,24 @@
                 }).get().reverse());
 
                 if ($hiddenUngroupedOrigButtons.length) {
+                    var ungroupedTypesPosition = fieldConfig.ungroupedTypesPosition || 'before';
                     var $ul = $('<ul />');
+                    if (ungroupedTypesPosition === 'after') {
+                        $hiddenUngroupedOrigButtons = $($hiddenUngroupedOrigButtons.get().reverse());
+                    }
                     $hiddenUngroupedOrigButtons.each(function (index) {
                         var $btn = $(this).clone();
-                        if (index === $hiddenUngroupedOrigButtons.length - 1) {
-                            $btn.addClass('icon add');
+                        if (ungroupedTypesPosition === 'after') {
+                            if (!index) {
+                                $btn.addClass('icon add');
+                            }
+                            $matrixmateButtons.append($btn);
+                        } else {
+                            if (index === $hiddenUngroupedOrigButtons.length - 1) {
+                                $btn.addClass('icon add');
+                            }
+                            $matrixmateButtons.prepend($btn);
                         }
-                        $matrixmateButtons.prepend($btn);
                         var type = $btn.data('type');
                         var $li = $('<li/>');
                         var $a = $('<a/>').attr('data-type', type).text($btn.text());

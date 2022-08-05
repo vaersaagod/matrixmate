@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.5.0 - 2022-08-05
+### Added  
+- Added the `ungroupedTypesPosition` field config setting, which can be used to specify the display order for ungrouped block types  
+
 ## 1.4.5 - 2022-07-14
 ### Improved
 - MatrixMate now defers registering its CP resources to an `Application::EVENT_INIT` event handler, reducing the risk of conflicting with other plugins.  
