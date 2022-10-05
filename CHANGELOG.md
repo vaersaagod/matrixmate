@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+- Fixes a bug where MatrixMate could make element edit forms create a new auto-saved draft, even if no fields were changed.  
+
 ## 2.1.0 - 2022-08-05
 ### Added
 - Added the `ungroupedTypesPosition` field config setting, which can be used to specify the display order for ungrouped block types  
