@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Improved
+- Improved styling for block tabs  
 ### Fixed
 - Fixes a bug where MatrixMate could make element edit forms create a new auto-saved draft, even if no fields were changed.  
 
