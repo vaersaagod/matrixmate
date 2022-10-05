@@ -22,6 +22,43 @@
 
     const MATRIX_MATE_KEY = 'matrixMate';
 
+    Craft.MatrixMate = {
+        fieldConfig: null,
+        elementContexts: {},
+        initPrimaryForm(elementId, context) {
+            if (Craft.cp.$primaryForm && Craft.cp.$primaryForm.length) {
+                Craft.cp.$primaryForm.data('matrixMateContext', context);
+            }
+            this.elementContexts[`${elementId}`] = context;
+        },
+        getContextForElement(elementId) {
+            return this.elementContexts[`${elementId}`] || '*';
+        },
+        getConfigForField($field, context) {
+            if (!context) {
+                return null;
+            }
+            const handle = $field.attr('id').split('-').pop();
+            const fieldConfig = this.fieldConfig[handle] || null;
+            if (!fieldConfig) {
+                return null;
+            }
+            return fieldConfig[context] || fieldConfig['*'] || null;
+        },
+        maybeOverrideInitialSerializedForm($form) {
+            const { elementEditor } = $form.data();
+            if (!elementEditor) {
+                return;
+            }
+            const data = elementEditor.serializeForm(true);
+            if (data === $form.data('initialSerializedValue') && data === elementEditor.lastSerializedValue) {
+                return;
+            }
+            $form.data('initialSerializedValue', data);
+            elementEditor.lastSerializedValue = data;
+        }
+    };
+
     Craft.MatrixMateField = Garnish.Base.extend({
         init($field) {
             if ($field.data(MATRIX_MATE_KEY)) {
@@ -40,6 +77,7 @@
             this.initBlocks();
             this.maybeDisableBlockTypes();
             this.$field.data(MATRIX_MATE_KEY, this);
+            Craft.MatrixMate.maybeOverrideInitialSerializedForm(this.$form);
         },
         initBlockTypeGroups() {
 
@@ -563,35 +601,11 @@
         }
     });
 
-    Craft.MatrixMate = {
-        fieldConfig: null,
-        elementContexts: {},
-        initPrimaryForm(elementId, context) {
-            if (Craft.cp.$primaryForm && Craft.cp.$primaryForm.length) {
-                Craft.cp.$primaryForm.data('matrixMateContext', context);
-            }
-            this.elementContexts[`${elementId}`] = context;
-        },
-        getContextForElement(elementId) {
-            return this.elementContexts[`${elementId}`] || '*';
-        },
-        getConfigForField($field, context) {
-            if (!context) {
-                return null;
-            }
-            const handle = $field.attr('id').split('-').pop();
-            const fieldConfig = this.fieldConfig[handle] || null;
-            if (!fieldConfig) {
-                return null;
-            }
-            return fieldConfig[context] || fieldConfig['*'] || null;
-        }
-    };
-
     const elementEditorInitFn = Craft.ElementEditor.prototype.init;
     Craft.ElementEditor.prototype.init = function () {
         elementEditorInitFn.apply(this, arguments);
         this.$container.data('matrixMateContext', Craft.MatrixMate.getContextForElement(this.settings.draftId || this.settings.canonicalId));
+        Craft.MatrixMate.maybeOverrideInitialSerializedForm(this.$container);
     };
 
     // Override the native MatrixInput::updateAddBlockBtn method
