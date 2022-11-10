@@ -179,6 +179,8 @@ h6 + [data-matrixmate-group] {
 }
 
 [data-matrixmate-group] a.disabled,
-.matrixmate-menu a.disabled {
+.matrixmate-menu a.disabled,
+button.matrixmate-disabled,
+a.matrixmate-disabled {
     pointer-events: none;
 }

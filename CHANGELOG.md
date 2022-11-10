@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+- Fixes an issue where disabled block type add buttons would still be clickable. #58  
+
 ## 2.1.1 - 2022-10-05  
 ### Improved
 - Improved styling for block tabs  

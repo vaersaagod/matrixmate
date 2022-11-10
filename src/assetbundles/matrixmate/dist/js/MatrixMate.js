@@ -144,7 +144,7 @@
                     const $li = $('<li/>');
                     const $a = $('<a/>').attr('data-type', type).text($origTypeBtn.text());
                     if (disable) {
-                        $a.addClass('disabled');
+                        $a.addClass('disabled matrixmate-disabled');
                     }
 
                     $li.append($a).appendTo($mainUl);
@@ -547,9 +547,9 @@
             // Update Add buttons
             this.$field.find('> .buttons .btn[data-type="' + type + '"], > .matrixmate-buttons .btn[data-type="' + type + '"]').each(function () {
                 if (disable) {
-                    $(this).addClass('disabled');
+                    $(this).addClass('disabled matrixmate-disabled');
                 } else {
-                    $(this).removeClass('disabled');
+                    $(this).removeClass('disabled matrixmate-disabled');
                 }
             });
 
@@ -565,9 +565,9 @@
                 }
                 $container.find('a[data-type="' + type + '"]').each(function () {
                     if (disable) {
-                        $(this).addClass('disabled');
+                        $(this).addClass('disabled matrixmate-disabled');
                     } else {
-                        $(this).removeClass('disabled');
+                        $(this).removeClass('disabled matrixmate-disabled');
                     }
                 });
             });
