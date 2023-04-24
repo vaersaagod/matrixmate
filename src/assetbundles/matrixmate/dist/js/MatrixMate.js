@@ -46,16 +46,18 @@
             return fieldConfig[context] || fieldConfig['*'] || null;
         },
         maybeOverrideInitialSerializedForm($form) {
-            const { elementEditor } = $form.data();
-            if (!elementEditor) {
-                return;
-            }
-            const data = elementEditor.serializeForm(true);
-            if (data === $form.data('initialSerializedValue') && data === elementEditor.lastSerializedValue) {
-                return;
-            }
-            $form.data('initialSerializedValue', data);
-            elementEditor.lastSerializedValue = data;
+            setTimeout(() => {
+                const { elementEditor } = $form.data();
+                if (!elementEditor) {
+                    return;
+                }
+                const data = elementEditor.serializeForm(true);
+                if (data === $form.data('initialSerializedValue') && data === elementEditor.lastSerializedValue) {
+                    return;
+                }
+                $form.data('initialSerializedValue', data);
+                elementEditor.lastSerializedValue = data;
+            }, 0);
         }
     };
 
