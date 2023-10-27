@@ -115,7 +115,7 @@
                     continue;
                 }
 
-                const $mainMenuBtn = $('<div class="btn menubtn">' + label + '</div>').appendTo($matrixmateButtons);
+                const $mainMenuBtn = $('<div class="btn menubtn" tabindex="0">' + label + '</div>').appendTo($matrixmateButtons);
                 $mainMenuBtn.addClass('dashed');
 
                 const $mainMenu = $('<div class="menu matrixmate-menu" data-matrixmate-group="' + label + '" />').appendTo($matrixmateButtons);
