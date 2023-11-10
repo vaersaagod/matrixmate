@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## Unreleased
 ### Fixed
-- Fixed an issue where block types hidden via `hiddenTypes` could still show up in Matrix blocks' cogwheel menus, if they were included in one or several block type groups.   
+- Fixed an issue where block types hidden via `hiddenTypes` could still show up in Matrix blocks' cogwheel menus, if they were included in one or several block type groups.
+- Fixed an issue where block group buttons weren't focusable. Thanks @jmcgaha!
 
 ## 2.1.3 - 2023-04-24
 ### Fixed
