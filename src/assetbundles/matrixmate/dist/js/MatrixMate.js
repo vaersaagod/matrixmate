@@ -255,7 +255,7 @@
                 return type && hiddenTypes.indexOf(type) > -1;
             });
 
-            $buttonsToHide.addClass('hidden');
+            $buttonsToHide.remove();
 
             // Make sure the first visible type button has the + icons
             $matrixButtons.find('.btn.add.icon').removeClass('add icon');
