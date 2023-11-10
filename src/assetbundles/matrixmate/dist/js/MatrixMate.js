@@ -320,6 +320,7 @@
 
                 const $origUl = $menu.find('a[data-action="add"]').parents('li').parent('ul');
                 const groupsConfig = this.config.groups || null;
+                const hiddenTypes = this.config.hiddenTypes || [];
 
                 // Create groups
                 const usedTypes = [];
@@ -332,6 +333,12 @@
                             continue;
                         }
 
+                        // Get the types; excluding any that are explictly hidden
+                        const types = (groupsConfig[i]['types'] || []).filter(type => hiddenTypes.indexOf(type) === -1);
+                        if (!types.length) {
+                            continue;
+                        }
+
                         const $newUl = $('<ul class="padded" data-matrixmate-group="' + label + '" />');
                         if (c > 0) {
                             $('<hr/>').insertBefore($origUl);
@@ -341,7 +348,6 @@
                         $newUl.insertBefore($origUl);
 
                         // Create type buttons
-                        const types = groupsConfig[i]['types'] || [];
                         for (let j = 0; j < types.length; ++j) {
                             const type = types[j];
                             usedTypes.push(type);
@@ -359,7 +365,6 @@
                 }
 
                 // Un-hide un-grouped types that aren't explicitly hidden :P
-                const hiddenTypes = this.config.hiddenTypes || [];
                 const hasGroupConfig = !!(this.config['groups'] || null);
                 const hideUngrouped = !!(this.config.hideUngroupedTypes || null);
                 const lis = [];
