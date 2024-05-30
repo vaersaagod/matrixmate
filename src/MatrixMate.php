@@ -213,6 +213,10 @@ class MatrixMate extends Plugin
         }
 
         $elementId = (int)($element->draftId ?? $element->canonicalId ?? $element->id);
+        if (empty($elementId) && $element instanceof \craft\commerce\elements\Product) {
+            // New Commerce products have no IDs
+            $elementId = 'new-product';
+        }
 
         if (!$elementId) {
             return;
@@ -224,7 +228,7 @@ class MatrixMate extends Plugin
         $js = <<<JS
 if (Craft && Craft.MatrixMate) {
     Craft.MatrixMate.fieldConfig = $configJs;
-    Craft.MatrixMate.initPrimaryForm($elementId, '$context');
+    Craft.MatrixMate.initPrimaryForm('$elementId', '$context');
 }
 JS;
         Craft::$app->getView()->registerAssetBundle(MatrixMateAsset::class, \yii\web\View::POS_END);
