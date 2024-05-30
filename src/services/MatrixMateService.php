@@ -159,6 +159,11 @@ class MatrixMateService extends Component
                         }
                     } elseif ($context === 'users') {
                         $settings[$context] = $contextSettings;
+                    } elseif (str_starts_with($context, 'productType:') && !empty(Craft::$app->getPlugins()->getPlugin('commerce'))) {
+                        $productTypeHandle = \explode(':', $context)[1] ?? null;
+                        if ($productTypeHandle && $productType = \craft\commerce\Plugin::getInstance()->getProductTypes()->getProductTypeByHandle($productTypeHandle)) {
+                            $settings["productType:$productType->id"] = $contextSettings;
+                        }
                     } else {
                         $settings[$context] = $contextSettings;
                     }
