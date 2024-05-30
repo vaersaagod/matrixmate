@@ -150,6 +150,16 @@ class MatrixMate extends Plugin
             }
         );
 
+        // Register asset bundle for products
+        $commercePlugin = Craft::$app->getPlugins()->getPlugin('commerce', false);
+        if($commercePlugin && $commercePlugin->isInstalled) {
+            Craft::$app->getView()->hook('cp.commerce.product.edit.content', function (array $context) {
+                /** @var Element|null $element */
+                $element = $context['product'] ?? null;
+                $this->registerAssetBundleForElement($element);
+            });
+        }
+
         // Register asset bundle for users
         Craft::$app->getView()->hook('cp.users.edit', function (array $context) {
             /** @var Element|null $element */
@@ -182,6 +192,8 @@ class MatrixMate extends Plugin
             $context = "globalSet:$element->id";
         } elseif ($element instanceof User) {
             $context = 'users';
+        } elseif ($element instanceof \craft\commerce\elements\Product) {
+            $context = "productType:{$element->getType()->id}";
         } else {
             $context = '*';
         }
