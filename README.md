@@ -133,6 +133,7 @@ Additionally, a "global" config that will apply everywhere else is added using t
 `globalSet:{handle}` - Apply for a particular global set  
 `volume:{handle}` - Apply for assets in a particular volume  
 `users` - Apply for user account edit pages  
+`productType:{handle}` - Apply for Commerce products with a particular product type
 
 #### Config context inheritance
 

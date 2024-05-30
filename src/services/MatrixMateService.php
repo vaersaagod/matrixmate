@@ -15,7 +15,6 @@ use vaersaagod\matrixmate\MatrixMate;
 use Craft;
 use craft\base\Component;
 use craft\base\Field;
-use craft\elements\User;
 use craft\fields\Matrix;
 use craft\helpers\Json;
 

@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+- Adds support for Commerce products
+
 ## 2.1.4 - 2023-11-11
 ### Fixed
 - Fixed an issue where block types hidden via `hiddenTypes` could still show up in Matrix blocks' cogwheel menus, if they were included in one or several block type groups.

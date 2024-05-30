@@ -15,28 +15,18 @@ use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
 use craft\elements\Category;
-use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use craft\elements\GlobalSet;
 use craft\elements\User;
 use craft\events\DefineHtmlEvent;
-use craft\events\PopulateElementEvent;
-use craft\events\TemplateEvent;
 use craft\helpers\Json;
 use craft\services\Fields;
 use craft\web\Application;
-use craft\web\Controller;
-
-use craft\web\CpScreenResponseFormatter;
-use craft\web\Request;
-use craft\web\Response;
-use craft\web\View;
 
 use vaersaagod\matrixmate\assetbundles\matrixmate\MatrixMateAsset;
 use vaersaagod\matrixmate\services\MatrixMateService;
 use vaersaagod\matrixmate\models\Settings;
 
-use yii\base\ActionEvent;
 use yii\base\Event;
 
 /**
@@ -150,16 +140,6 @@ class MatrixMate extends Plugin
             }
         );
 
-        // Register asset bundle for products
-        $commercePlugin = Craft::$app->getPlugins()->getPlugin('commerce', false);
-        if($commercePlugin && $commercePlugin->isInstalled) {
-            Craft::$app->getView()->hook('cp.commerce.product.edit.content', function (array $context) {
-                /** @var Element|null $element */
-                $element = $context['product'] ?? null;
-                $this->registerAssetBundleForElement($element);
-            });
-        }
-
         // Register asset bundle for users
         Craft::$app->getView()->hook('cp.users.edit', function (array $context) {
             /** @var Element|null $element */
@@ -173,6 +153,15 @@ class MatrixMate extends Plugin
             $element = $context['globalSet'] ?? null;
             $this->registerAssetBundleForElement($element);
         });
+
+        // Register asset bundle for products
+        if (!empty(Craft::$app->getPlugins()->getPlugin('commerce'))) {
+            Craft::$app->getView()->hook('cp.commerce.product.edit.content', function (array $context) {
+                /** @var Element|null $element */
+                $element = $context['product'] ?? null;
+                $this->registerAssetBundleForElement($element);
+            });
+        }
 
     }
 
@@ -193,7 +182,12 @@ class MatrixMate extends Plugin
         } elseif ($element instanceof User) {
             $context = 'users';
         } elseif ($element instanceof \craft\commerce\elements\Product) {
-            $context = "productType:{$element->getType()->id}";
+            try {
+                $context = "productType:{$element->getType()->id}";
+            } catch (\Throwable $e) {
+                Craft::error($e, __METHOD__);
+                $context = '*';
+            }
         } else {
             $context = '*';
         }
@@ -223,7 +217,7 @@ class MatrixMate extends Plugin
         }
 
         $context = $this->getContextForElement($element);
-        $configJs = Json::encode($fieldConfig, JSON_UNESCAPED_UNICODE);
+        $configJs = Json::encode($fieldConfig);
 
         $js = <<<JS
 if (Craft && Craft.MatrixMate) {
