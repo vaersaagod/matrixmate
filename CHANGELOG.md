@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
-- Adds support for Commerce products
+## 2.2.0 - 2024-05-30
+### Added
+- Adds support for Commerce products [#55](https://github.com/vaersaagod/matrixmate/issues/55), [#73](https://github.com/vaersaagod/matrixmate/pull/73)
 
 ## 2.1.4 - 2023-11-11
 ### Fixed

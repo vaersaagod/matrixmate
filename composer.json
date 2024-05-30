@@ -2,7 +2,7 @@
     "name": "vaersaagod/matrixmate",
     "description": "Welding Matrix into shape, mate!",
     "type": "craft-plugin",
-    "version": "2.1.4",
+    "version": "2.2.0",
     "keywords": [
         "craft",
         "cms",
