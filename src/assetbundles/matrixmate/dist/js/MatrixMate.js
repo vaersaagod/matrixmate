@@ -257,9 +257,10 @@
 
             $buttonsToHide.remove();
 
-            // Make sure the first visible type button has the + icons
-            $matrixButtons.find('.btn.add.icon').removeClass('add icon');
-            $matrixButtons.find('.btn[data-type]:visible').first().addClass('add icon');
+            // Make sure the first visible type button has the + icon
+            if (!$matrixButtons.find('.btn[data-type].add.icon').length) {
+                $matrixButtons.find('.btn[data-type]').first().addClass('add icon');
+            }
 
             // Also hide from the collapsed menu
             const $menuBtn = this.$field.find('> .buttons').first().find('.btn.menubtn');

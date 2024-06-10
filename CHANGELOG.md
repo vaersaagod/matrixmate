@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+- Fixed a bug where block types having reached their `maxLimit` would still be creatable via collapsed block type button menus [#74](https://github.com/vaersaagod/matrixmate/issues/74)  
+
 ## 2.2.0 - 2024-05-30
 ### Added
 - Adds support for Commerce products [#55](https://github.com/vaersaagod/matrixmate/issues/55), [#73](https://github.com/vaersaagod/matrixmate/pull/73)
