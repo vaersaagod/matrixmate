@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 2.2.1 - 2024-06-10
 ### Fixed
 - Fixed a bug where block types having reached their `maxLimit` would still be creatable via collapsed block type button menus [#74](https://github.com/vaersaagod/matrixmate/issues/74)  
 
