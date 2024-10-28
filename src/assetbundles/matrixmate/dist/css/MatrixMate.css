@@ -131,8 +131,9 @@ body.rtl .matrixmate-buttons > .btn, body.rtl .matrixmate-buttons > .btngroup {
     left: 0; top: calc(100% + 1px);
 }
 
-.matrixmate-block-inited.disabled .matrixmate-tabs {
-    right: 106px;
+.matrixmate-block-inited.disabled .matrixmate-tabs,
+.matrixmate-block-inited.disabled-entry .matrixmate-tabs {
+    right: 100px;
 }
 
 .matrixmate-block-inited.matrixmate-has-tabs > .titlebar {

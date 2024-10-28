@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.2 - 2024-10-28
+### Fixed
+- Fixes a styling issue with block type tabs in disabled blocks, on Craft 4.9.4+
+
 ## 2.2.1 - 2024-06-10
 ### Fixed
 - Fixed a bug where block types having reached their `maxLimit` would still be creatable via collapsed block type button menus [#74](https://github.com/vaersaagod/matrixmate/issues/74)  
