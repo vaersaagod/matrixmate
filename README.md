@@ -9,6 +9,7 @@ Welding Matrix into shape, mate!
 This plugin requires Craft CMS 4.0.0 or later.  
 
 ‼️MatrixMate has been retired and will not be available for Craft 5. See [this issue](https://github.com/vaersaagod/matrixmate/issues/72) for more info.  
+Also see [this comment] for some hints and tips towards migrating away from MatrixMate 🚀
 
 ## Installation
 
